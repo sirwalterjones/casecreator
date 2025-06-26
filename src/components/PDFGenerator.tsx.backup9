@@ -136,15 +136,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
       tempDiv.innerHTML = cleanText;
       const decodedText = tempDiv.textContent || tempDiv.innerText || cleanText;
       
-      // Filter out date-like patterns that appear to be case numbers or IDs
-      const isDateLikePattern = /^\d{2}-\d{4}-\d{2}-\d{2}$/.test(decodedText.trim());
-      
-      // Filter out horizontal lines and separators
-      const isHorizontalLine = /^[-_=]{3,}$/.test(decodedText.trim()) || 
-                               decodedText.trim() === '' ||
-                               /^[\s\-_=]*$/.test(decodedText);
-      
-      if (decodedText && !isDateLikePattern && !isHorizontalLine) {
+      if (decodedText) {
         if (isFieldLabel(decodedText)) {
           content.push({
             type: 'label',
@@ -237,10 +229,6 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
                   });
                 }
               });
-              break;
-              
-            case 'hr':
-              // Skip horizontal rule elements completely
               break;
               
             default:
@@ -337,8 +325,6 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
     });
   };
 
-  // Default badge functionality removed to avoid PNG corruption issues
-
   // Main PDF generation function
   const generateProfessionalPDF = async () => {
     if (selectedPosts.length === 0) {
@@ -375,15 +361,22 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
         pdf.rect(0, 0, pageWidth, 40, "F");
         
-        // Cover image (only if provided by user)
+        // Cover image or badge
         if (templateSettings.coverImage) {
           try {
             const base64Image = await convertImageToBase64(templateSettings.coverImage);
             pdf.addImage(base64Image, 'JPEG', pageWidth/2 - 25, 50, 50, 50);
           } catch (e) {
             console.warn('Failed to add cover image:', e);
-            // Skip image if it fails to load
           }
+        } else {
+          // Default badge
+          pdf.setFillColor(0, 0, 139);
+          pdf.circle(pageWidth/2, 75, 25, "F");
+          pdf.setTextColor(255, 215, 0);
+          pdf.setFont("times", "bold");
+          pdf.setFontSize(20);
+          pdf.text("★", pageWidth/2 - 3, 80);
         }
 
         // Title
@@ -473,30 +466,9 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         for (let i = 0; i < parsedContent.length; i++) {
           const item = parsedContent[i];
           
-          // Estimate height needed for this content item
-          let estimatedHeight = 0;
-          switch (item.type) {
-            case 'heading':
-              estimatedHeight = 25;
-              break;
-            case 'label':
-              estimatedHeight = 20;
-              break;
-            case 'paragraph':
-              // Estimate based on text length and wrapping
-              const paragraphLines = pdf.splitTextToSize(item.text, contentWidth);
-              estimatedHeight = paragraphLines.length * lineHeight + 5;
-              break;
-            case 'list':
-              const listLines = pdf.splitTextToSize(item.text, contentWidth - 10);
-              estimatedHeight = listLines.length * lineHeight + 5;
-              break;
-            default:
-              estimatedHeight = 15;
-          }
-          
-          // Check if we need a new page BEFORE rendering this item
-          if (yPos + estimatedHeight > pageHeight - 40) {
+          // NO PAGE BREAKS DURING CONTENT - Let content flow naturally
+          // Only check if we're near the bottom of the page and add new page if needed
+          if (yPos > pageHeight - 40) {
             // Add footer
             pdf.setFillColor(footerColor.r, footerColor.g, footerColor.b);
             pdf.rect(0, pageHeight - 15, pageWidth, 15, "F");

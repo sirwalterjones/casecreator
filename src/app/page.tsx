@@ -45,7 +45,7 @@ export default function Home() {
   >([]);
   const [selectedPosts, setSelectedPosts] = React.useState<number[]>([]);
   const [allPosts, setAllPosts] = React.useState<Post[]>([]);
-  const [pdfSettings, setPdfSettings] = React.useState({});
+  const [pdfSettings, setPdfSettings] = React.useState<any>({});
   const [siteUrl, setSiteUrl] = React.useState<string>("");
 
   const handleNextStep = () => {

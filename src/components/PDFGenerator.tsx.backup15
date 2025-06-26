@@ -337,7 +337,56 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
     });
   };
 
-  // Default badge functionality removed to avoid PNG corruption issues
+  // Get default CMANS badge as base64
+  const getDefaultBadgeImage = async (): Promise<string> => {
+    try {
+      // Try to load the SVG badge first
+      const svgResponse = await fetch('/images/cmans-badge.svg');
+      if (svgResponse.ok) {
+        const svgText = await svgResponse.text();
+        // Use URL encoding instead of base64 to avoid Unicode issues
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
+      }
+      
+      // Try to load PNG badge as fallback
+      const pngResponse = await fetch('/images/cmans-badge.png');
+      if (pngResponse.ok) {
+        const blob = await pngResponse.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      }
+    } catch (e) {
+      console.warn('Could not load default badge image:', e);
+    }
+    
+    // Fallback: Built-in Cherokee Multi-Agency Narcotics Squad badge (using * instead of ★ for compatibility)
+    const svgBadge = `<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="95" fill="#1a1a1a" stroke="#DAA520" stroke-width="3"/>
+      <circle cx="100" cy="100" r="75" fill="#B22234"/>
+      <rect x="25" y="85" width="150" height="5" fill="#FFFFFF"/>
+      <rect x="25" y="95" width="150" height="5" fill="#FFFFFF"/>
+      <rect x="25" y="105" width="150" height="5" fill="#FFFFFF"/>
+      <rect x="25" y="115" width="150" height="5" fill="#FFFFFF"/>
+      <rect x="25" y="75" width="60" height="40" fill="#3C3B6E"/>
+      <text x="40" y="90" fill="#FFFFFF" font-family="Arial" font-size="8">*</text>
+      <text x="55" y="90" fill="#FFFFFF" font-family="Arial" font-size="8">*</text>
+      <text x="70" y="90" fill="#FFFFFF" font-family="Arial" font-size="8">*</text>
+      <text x="47" y="100" fill="#FFFFFF" font-family="Arial" font-size="8">*</text>
+      <text x="62" y="100" fill="#FFFFFF" font-family="Arial" font-size="8">*</text>
+      <circle cx="100" cy="100" r="35" fill="#DAA520" stroke="#1a1a1a" stroke-width="2"/>
+      <circle cx="100" cy="100" r="30" fill="#FFFFFF" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="100" y="90" text-anchor="middle" fill="#1a1a1a" font-family="Arial" font-size="10" font-weight="bold">AGENT</text>
+      <circle cx="100" cy="100" r="18" fill="#3C3B6E"/>
+      <text x="100" y="98" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">GA</text>
+      <text x="100" y="110" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6" font-weight="bold">NARCOTICS</text>
+      <text x="100" y="120" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6" font-weight="bold">SQUAD</text>
+    </svg>`;
+    
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgBadge)}`;
+  };
 
   // Main PDF generation function
   const generateProfessionalPDF = async () => {
@@ -375,15 +424,21 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
         pdf.rect(0, 0, pageWidth, 40, "F");
         
-        // Cover image (only if provided by user)
+        // Cover image or badge
         if (templateSettings.coverImage) {
           try {
             const base64Image = await convertImageToBase64(templateSettings.coverImage);
             pdf.addImage(base64Image, 'JPEG', pageWidth/2 - 25, 50, 50, 50);
           } catch (e) {
             console.warn('Failed to add cover image:', e);
-            // Skip image if it fails to load
+            // Fall back to default badge if custom image fails
+            const defaultBadge = await getDefaultBadgeImage();
+            pdf.addImage(defaultBadge, 'PNG', pageWidth/2 - 25, 50, 50, 50);
           }
+        } else {
+          // Use CMANS badge as default
+          const defaultBadge = await getDefaultBadgeImage();
+          pdf.addImage(defaultBadge, 'PNG', pageWidth/2 - 25, 50, 50, 50);
         }
 
         // Title

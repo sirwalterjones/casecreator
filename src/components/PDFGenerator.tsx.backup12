@@ -337,8 +337,6 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
     });
   };
 
-  // Default badge functionality removed to avoid PNG corruption issues
-
   // Main PDF generation function
   const generateProfessionalPDF = async () => {
     if (selectedPosts.length === 0) {
@@ -375,15 +373,22 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
         pdf.rect(0, 0, pageWidth, 40, "F");
         
-        // Cover image (only if provided by user)
+        // Cover image or badge
         if (templateSettings.coverImage) {
           try {
             const base64Image = await convertImageToBase64(templateSettings.coverImage);
             pdf.addImage(base64Image, 'JPEG', pageWidth/2 - 25, 50, 50, 50);
           } catch (e) {
             console.warn('Failed to add cover image:', e);
-            // Skip image if it fails to load
           }
+        } else {
+          // Default badge
+          pdf.setFillColor(0, 0, 139);
+          pdf.circle(pageWidth/2, 75, 25, "F");
+          pdf.setTextColor(255, 215, 0);
+          pdf.setFont("times", "bold");
+          pdf.setFontSize(20);
+          pdf.text("★", pageWidth/2 - 3, 80);
         }
 
         // Title

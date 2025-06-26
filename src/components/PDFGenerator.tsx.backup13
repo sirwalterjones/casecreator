@@ -337,7 +337,27 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
     });
   };
 
-  // Default badge functionality removed to avoid PNG corruption issues
+  // Get default CMANS badge as base64
+  const getDefaultBadgeImage = async (): Promise<string> => {
+    try {
+      // Try to load the badge from the public folder
+      const response = await fetch('/images/cmans-badge.png');
+      if (response.ok) {
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      }
+    } catch (e) {
+      console.warn('Could not load default badge image:', e);
+    }
+    
+    // Fallback: Cherokee Multi-Agency Narcotics Squad badge as base64
+    // This is a placeholder - you can replace this with the actual badge base64
+    return "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOTUiIGZpbGw9IiMwMDAwODAiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIxMCIvPgo8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjcwIiBmaWxsPSIjRkZGRkZGIiBzdHJva2U9IiMwMDAwODAiIHN0cm9rZS13aWR0aD0iMyIvPgo8dGV4dCB4PSIxMDAiIHk9IjkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMDAwMDgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIj5DTUFOUzwvdGV4dD4KPHR4dCB4PSIxMDAiIHk9IjExNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwMDA4MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+TkFSQ09USUNTPC90ZXh0Pgo8dGV4dCB4PSIxMDAiIHk9IjEzNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwMDA4MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+U1FVQUQ8L3RleHQ+Cjwvc3ZnPgo=";
+  };
 
   // Main PDF generation function
   const generateProfessionalPDF = async () => {
@@ -375,15 +395,21 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
         pdf.rect(0, 0, pageWidth, 40, "F");
         
-        // Cover image (only if provided by user)
+        // Cover image or badge
         if (templateSettings.coverImage) {
           try {
             const base64Image = await convertImageToBase64(templateSettings.coverImage);
             pdf.addImage(base64Image, 'JPEG', pageWidth/2 - 25, 50, 50, 50);
           } catch (e) {
             console.warn('Failed to add cover image:', e);
-            // Skip image if it fails to load
+            // Fall back to default badge if custom image fails
+            const defaultBadge = await getDefaultBadgeImage();
+            pdf.addImage(defaultBadge, 'PNG', pageWidth/2 - 25, 50, 50, 50);
           }
+        } else {
+          // Use CMANS badge as default
+          const defaultBadge = await getDefaultBadgeImage();
+          pdf.addImage(defaultBadge, 'PNG', pageWidth/2 - 25, 50, 50, 50);
         }
 
         // Title
