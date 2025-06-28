@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   title: "CMANS Case File Generator",
   description:
     "Cherokee Multi-Agency Narcotics Squad - Professional Case File PDF Generator",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icon.png",
+    shortcut: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
