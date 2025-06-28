@@ -312,11 +312,11 @@ const CategorySelector = ({
   );
 
   return (
-    <Card className="w-full h-full bg-slate-800/30 border-slate-700/50">
-      <CardHeader className="bg-gradient-to-r from-slate-800/50 to-blue-900/30 border-b border-slate-700/50">
-        <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
+    <Card className="w-full h-full bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50 p-6">
+        <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
           <svg
-            className="w-5 h-5 text-blue-400"
+            className="w-5 h-5 text-blue-600"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -328,10 +328,10 @@ const CategorySelector = ({
         {/* Remote URL Input */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4 text-muted-foreground" />
+            <Globe className="h-4 w-4 text-slate-600" />
             <Label
               htmlFor="remote-url"
-              className="text-sm font-medium text-slate-300"
+              className="text-sm font-medium text-slate-700"
             >
               Case Source URL
             </Label>
@@ -343,10 +343,10 @@ const CategorySelector = ({
                 placeholder="https://cmansrms.us or https://intelligence-source.com"
                 value={remoteUrl}
                 onChange={(e) => handleUrlChange(e.target.value)}
-                className={`bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 ${!isValidUrl ? "border-red-500" : ""}`}
+                className={`bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20 ${!isValidUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400/20" : ""}`}
               />
               {!isValidUrl && (
-                <p className="text-sm text-destructive mt-1">
+                <p className="text-sm text-red-600 mt-1">
                   Please enter a valid URL
                 </p>
               )}
@@ -355,7 +355,7 @@ const CategorySelector = ({
               onClick={handleFetchCategories}
               disabled={!isValidUrl || loading}
               size="sm"
-              className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              className="shrink-0 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -368,38 +368,38 @@ const CategorySelector = ({
 
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
           <Input
             placeholder="Search case numbers..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 bg-slate-800/50 border-slate-600 text-white placeholder-slate-400"
+            className="pl-10 bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
           />
         </div>
       </CardHeader>
-      <CardContent className="bg-slate-900/20">
+      <CardContent className="bg-white/40 backdrop-blur-sm p-6">
         {error && (
-          <Alert className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-sm">{error}</AlertDescription>
+          <Alert className="mb-4 border-red-200 bg-red-50/80 text-red-800">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-sm text-red-700">{error}</AlertDescription>
           </Alert>
         )}
 
         {loading ? (
           <div className="flex justify-center items-center h-40">
             <div className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 animate-spin" />
-              <p className="text-muted-foreground">
+              <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+              <p className="text-slate-600">
                 Fetching categories from remote site...
               </p>
             </div>
           </div>
         ) : filteredCategories.length === 0 ? (
-          <div className="p-4 text-muted-foreground text-center">
+          <div className="p-4 text-slate-600 text-center">
             {categories.length === 0 ? (
               <div>
-                <p className="mb-2">No categories loaded</p>
-                <p className="text-sm">
+                <p className="mb-2 text-slate-700 font-medium">No categories loaded</p>
+                <p className="text-sm text-slate-500">
                   Enter a website URL above and click "Fetch" to load categories
                 </p>
               </div>
@@ -413,19 +413,20 @@ const CategorySelector = ({
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center space-x-2 p-3 rounded-lg hover:bg-slate-700/50 border border-slate-700/30 transition-all duration-200"
+                  className="flex items-center space-x-3 p-4 rounded-xl hover:bg-blue-50/70 border border-slate-200/60 hover:border-blue-300/50 transition-all duration-200 bg-white/60 backdrop-blur-sm shadow-sm"
                 >
                   <Checkbox
                     id={`category-${category.id}`}
                     checked={category.selected || false}
                     onCheckedChange={() => handleCategoryToggle(category.id)}
+                    className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                   />
                   <Label
                     htmlFor={`category-${category.id}`}
-                    className="flex-1 cursor-pointer flex justify-between text-slate-300"
+                    className="flex-1 cursor-pointer flex justify-between text-slate-700 hover:text-slate-900"
                   >
-                    <span>{category.name}</span>
-                    <span className="text-muted-foreground text-sm">
+                    <span className="font-medium">{category.name}</span>
+                    <span className="text-slate-500 text-sm bg-slate-100 px-2 py-1 rounded-full">
                       {category.count} posts
                     </span>
                   </Label>

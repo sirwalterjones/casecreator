@@ -171,16 +171,194 @@ const PostPreview = ({
           const excerpt =
             excerptElement?.textContent?.trim().substring(0, 200) || "";
           const featuredImage = imageElement?.getAttribute("src") || undefined;
+          
+          // Extract full content for better attachment detection and PDF generation
+          const fullContent = element.innerHTML || `<p>${excerpt}</p>`;
+
+          // Extract attachments from the post element
+          const attachments: Attachment[] = [];
+          let attachmentId = 1;
+
+          // Look for attachment links in various formats, including Formidable Forms
+          const attachmentSelectors = [
+            // File type selectors
+            'a[href*=".pdf"]',
+            'a[href*=".doc"]', 
+            'a[href*=".docx"]',
+            'a[href*=".txt"]',
+            'a[href*=".jpg"]',
+            'a[href*=".jpeg"]',
+            'a[href*=".png"]',
+            'a[href*=".gif"]',
+            'a[href*=".bmp"]',
+            'a[href*=".tiff"]',
+            'a[href*=".xlsx"]',
+            'a[href*=".xls"]',
+            'a[href*=".ppt"]',
+            'a[href*=".pptx"]',
+            'a[href*=".zip"]',
+            'a[href*=".rar"]',
+            'a[href*=".7z"]',
+            // WordPress upload directories
+            'a[href*="/wp-content/uploads/"]',
+            'a[href*="/uploads/"]',
+            'a[href*="/files/"]',
+            'a[href*="/attachments/"]',
+            // Formidable Forms specific paths
+            'a[href*="/wp-content/uploads/formidable/"]',
+            'a[href*="/formidable/"]',
+            'a[href*="/frm_uploads/"]',
+            'a[href*="/form-uploads/"]',
+            // Other common upload folders
+            'a[href*="/media/"]',
+            'a[href*="/documents/"]',
+            'a[href*="/download/"]',
+            'a[href*="/downloads/"]',
+            'a[href*="/assets/"]',
+            'a[href*="/content/"]',
+            'a[href*="/storage/"]',
+            'a[href*="/public/"]',
+            // Year-based upload folders (common in WordPress)
+            'a[href*="/2024/"]',
+            'a[href*="/2023/"]',
+            'a[href*="/2025/"]'
+          ];
+
+          attachmentSelectors.forEach(selector => {
+            const attachmentLinks = element.querySelectorAll(selector);
+            attachmentLinks.forEach(link => {
+              const href = link.getAttribute('href');
+              const linkText = link.textContent?.trim();
+              
+              if (href && linkText && linkText.length > 0) {
+                // Determine file type from URL or extension
+                let type = 'file';
+                if (href.includes('.pdf')) type = 'pdf';
+                else if (href.includes('.doc')) type = 'doc';
+                else if (href.includes('.txt')) type = 'txt';
+                else if (href.match(/\.(jpg|jpeg|png|gif)$/i)) type = 'image';
+
+                // Avoid duplicates
+                const isDuplicate = attachments.some(att => att.url === href);
+                if (!isDuplicate) {
+                  attachments.push({
+                    id: attachmentId++,
+                    title: linkText,
+                    url: href,
+                    type: type
+                  });
+                }
+              }
+            });
+          });
+
+          // Also look for attachment lists or sections, including Formidable Forms
+          const attachmentSections = element.querySelectorAll([
+            '[class*="attachment"]',
+            '[class*="file"]', 
+            '[id*="attachment"]',
+            '[id*="file"]',
+            // Formidable Forms specific selectors
+            '[class*="frm_upload"]',
+            '[class*="frm-upload"]',
+            '[class*="frm_file"]',
+            '[class*="frm-file"]',
+            '[class*="formidable"]',
+            '[class*="frm_form"]',
+            '[class*="frm-form"]',
+            '.frm_file_container',
+            '.frm_upload_field',
+            '.frm_file_field',
+            // Generic form upload selectors
+            '[class*="upload"]',
+            '[class*="document"]',
+            '[class*="media"]',
+            '.file-upload',
+            '.document-upload',
+            '.media-upload'
+          ].join(', '));
+          attachmentSections.forEach(section => {
+            const links = section.querySelectorAll('a[href]');
+            links.forEach(link => {
+              const href = link.getAttribute('href');
+              const linkText = link.textContent?.trim();
+              
+              if (href && linkText && linkText.length > 0) {
+                // Determine file type
+                let type = 'file';
+                if (href.includes('.pdf')) type = 'pdf';
+                else if (href.includes('.doc')) type = 'doc';
+                else if (href.includes('.txt')) type = 'txt';
+                else if (href.match(/\.(jpg|jpeg|png|gif)$/i)) type = 'image';
+
+                // Avoid duplicates
+                const isDuplicate = attachments.some(att => att.url === href);
+                if (!isDuplicate) {
+                  attachments.push({
+                    id: attachmentId++,
+                    title: linkText,
+                    url: href,
+                    type: type
+                  });
+                }
+              }
+            });
+          });
+
+          // Additional search for file references in text content (Formidable Forms often embeds file info)
+          const textContent = element.textContent || '';
+          const filePatterns = [
+            // Look for file URLs in text
+            /https?:\/\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi,
+            // Look for wp-content/uploads paths
+            /\/wp-content\/uploads\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi,
+            // Look for formidable specific paths
+            /\/formidable\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi,
+            // Look for any upload folder paths
+            /\/(?:uploads?|files?|documents?|media|attachments?)\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi
+          ];
+
+          filePatterns.forEach(pattern => {
+            const matches = textContent.match(pattern);
+            if (matches) {
+              matches.forEach(match => {
+                // Extract filename from path
+                const urlParts = match.split('/');
+                const filename = urlParts[urlParts.length - 1];
+                
+                if (filename && filename.includes('.')) {
+                  // Determine file type
+                  let type = 'file';
+                  if (match.includes('.pdf')) type = 'pdf';
+                  else if (match.includes('.doc')) type = 'doc';
+                  else if (match.includes('.txt')) type = 'txt';
+                  else if (match.match(/\.(jpg|jpeg|png|gif|bmp|tiff)$/i)) type = 'image';
+                  else if (match.match(/\.(xlsx?|ppt|pptx)$/i)) type = 'doc';
+
+                  // Avoid duplicates
+                  const isDuplicate = attachments.some(att => att.url === match);
+                  if (!isDuplicate) {
+                    attachments.push({
+                      id: attachmentId++,
+                      title: filename,
+                      url: match,
+                      type: type
+                    });
+                  }
+                }
+              });
+            }
+          });
 
           if (title.length > 5 && title.length < 200) {
             posts.push({
               id: postId++,
               title,
               excerpt,
-              content: `<p>${excerpt}</p>`,
+              content: fullContent,
               date: new Date().toISOString(),
               featuredImage,
-              attachments: [],
+              attachments: attachments,
             });
           }
         }
@@ -232,12 +410,67 @@ const PostPreview = ({
     });
   };
 
+  // Extract Report Title from post content
+  const extractReportTitle = (content: string): string | null => {
+    try {
+      // Create a temporary div to parse HTML content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+      
+      // Look for "Report Title" field in various formats
+      const textContent = tempDiv.textContent || tempDiv.innerText || '';
+      
+      // Try different patterns to find Report Title
+      const patterns = [
+        /Report Title[:\s]*([^\n\r]+)/i,
+        /Report Title Cell Phone[:\s]*([^\n\r]+)/i,
+        /Report Title:\s*([^\n\r]+)/i,
+        /Report Title\s+([^\n\r]+)/i
+      ];
+      
+      for (const pattern of patterns) {
+        const match = textContent.match(pattern);
+        if (match && match[1]) {
+          return match[1].trim();
+        }
+      }
+      
+      // Also try to find it in HTML structure
+      const allElements = tempDiv.querySelectorAll('*');
+      for (let i = 0; i < allElements.length; i++) {
+        const element = allElements[i];
+        const text = element.textContent || '';
+        if (text.toLowerCase().includes('report title')) {
+          const nextSibling = element.nextElementSibling;
+          if (nextSibling && nextSibling.textContent) {
+            const reportTitle = nextSibling.textContent.trim();
+            if (reportTitle && reportTitle.length > 0 && reportTitle.length < 200) {
+              return reportTitle;
+            }
+          }
+          
+          // Try to extract from the same element
+          const afterReportTitle = text.substring(text.toLowerCase().indexOf('report title') + 12);
+          const cleaned = afterReportTitle.replace(/^[:\s]*/, '').split('\n')[0].trim();
+          if (cleaned && cleaned.length > 0 && cleaned.length < 200) {
+            return cleaned;
+          }
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn('Error extracting report title:', error);
+      return null;
+    }
+  };
+
   return (
-    <div className="w-full bg-slate-800/30 border border-slate-700/50 rounded-lg p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+    <div className="w-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg rounded-2xl p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <svg
-            className="w-6 h-6 text-blue-400"
+            className="w-6 h-6 text-blue-600"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -254,7 +487,7 @@ const PostPreview = ({
             variant="outline"
             size="sm"
             onClick={handleSelectAll}
-            className="bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
+            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-all duration-200"
           >
             Select All Reports
           </Button>
@@ -262,7 +495,7 @@ const PostPreview = ({
             variant="outline"
             size="sm"
             onClick={handleDeselectAll}
-            className="bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
+            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200"
           >
             Deselect All
           </Button>
@@ -270,13 +503,13 @@ const PostPreview = ({
       </div>
 
       {selectedCategories.length > 0 && (
-        <div className="mb-4 p-3 bg-slate-700/30 border border-slate-600/50 rounded-lg">
-          <p className="text-sm font-medium mb-2 text-slate-300">
+        <div className="mb-6 p-4 bg-blue-50/70 border border-blue-200/50 rounded-xl backdrop-blur-sm">
+          <p className="text-sm font-medium mb-2 text-slate-700">
             Selected Case #'s:
           </p>
           <div className="flex flex-wrap gap-2">
             {selectedCategories.map((category) => (
-              <Badge key={category.id} variant="secondary">
+              <Badge key={category.id} className="bg-blue-100 text-blue-800 border-blue-200">
                 {category.name} ({category.count})
               </Badge>
             ))}
@@ -285,18 +518,54 @@ const PostPreview = ({
       )}
 
       {error && (
-        <Alert className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+        <Alert className="mb-4 border-red-200 bg-red-50/80 text-red-800">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-700">{error}</AlertDescription>
         </Alert>
       )}
 
-      <div className="mb-4">
-        <p className="text-slate-400">
+      <div className="mb-6">
+        <p className="text-slate-600 mb-4">
           {loading
             ? "Loading case reports..."
             : `${selectedPosts.length} of ${displayPosts.length} reports selected for case file generation`}
         </p>
+        
+        {displayPosts.length > 0 && (
+          <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Available Case Reports ({displayPosts.length} total):
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {displayPosts.map((post, index) => {
+                const reportTitle = extractReportTitle(post.content);
+                return (
+                  <div
+                    key={post.id}
+                    className={`text-sm p-3 rounded-md border transition-all duration-200 cursor-pointer ${
+                      selectedPosts.includes(post.id)
+                        ? "bg-blue-100 border-blue-300 text-blue-800"
+                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                    }`}
+                    onClick={() => handlePostSelection(post.id)}
+                  >
+                    <div className="font-medium mb-1">
+                      <span className="text-xs text-slate-500">#{index + 1}:</span> {post.title}
+                    </div>
+                    {reportTitle && (
+                      <div className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                        <span className="font-semibold">Report:</span> {reportTitle}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <ScrollArea className="h-[500px] pr-4">
@@ -304,23 +573,34 @@ const PostPreview = ({
           {displayPosts.map((post) => (
             <Card
               key={post.id}
-              className="overflow-hidden bg-slate-800/40 border-slate-700/50 hover:bg-slate-800/60 transition-all duration-200"
+              className="overflow-hidden bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-white/90 hover:shadow-lg transition-all duration-200 rounded-xl"
             >
-              <div className="flex items-start p-4">
+              <div className="flex items-start p-6">
                 <Checkbox
                   id={`post-${post.id}`}
                   checked={selectedPosts.includes(post.id)}
                   onCheckedChange={() => handlePostSelection(post.id)}
-                  className="mr-4 mt-1"
+                  className="mr-4 mt-1 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
                 <div className="flex-1">
-                  <CardHeader className="p-0 pb-2">
-                    <CardTitle className="text-xl text-white">
-                      {post.title}
-                    </CardTitle>
-                    <div className="flex items-center text-sm text-slate-400 mt-1">
+                  <CardHeader className="p-0 pb-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100 mb-3">
+                      <CardTitle className="text-2xl text-slate-900 font-bold leading-tight mb-2">
+                        {post.title}
+                      </CardTitle>
+                      {(() => {
+                        const reportTitle = extractReportTitle(post.content);
+                        return reportTitle ? (
+                          <div className="bg-amber-100 border border-amber-200 rounded-md p-2 mt-2">
+                            <span className="text-xs font-semibold text-amber-800 uppercase tracking-wide">Report Title:</span>
+                            <p className="text-sm font-medium text-amber-900 mt-1">{reportTitle}</p>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                    <div className="flex items-center text-sm text-slate-500">
                       <Calendar className="h-4 w-4 mr-1" />
-                      <span>{formatDate(post.date)}</span>
+                      <span className="font-medium">{formatDate(post.date)}</span>
                     </div>
                   </CardHeader>
 
@@ -328,7 +608,7 @@ const PostPreview = ({
                     <div className="flex flex-col md:flex-row gap-4">
                       {post.featuredImage && (
                         <div className="md:w-1/3">
-                          <div className="relative aspect-video rounded-md overflow-hidden">
+                          <div className="relative aspect-video rounded-lg overflow-hidden shadow-sm">
                             <img
                               src={post.featuredImage}
                               alt={post.title}
@@ -340,13 +620,13 @@ const PostPreview = ({
                       <div
                         className={post.featuredImage ? "md:w-2/3" : "w-full"}
                       >
-                        <p className="text-slate-300">{post.excerpt}</p>
+                        <p className="text-slate-700 leading-relaxed">{post.excerpt}</p>
 
                         {post.attachments.length > 0 && (
                           <div className="mt-4">
                             <div className="flex items-center gap-2 mb-2">
-                              <Paperclip className="h-4 w-4" />
-                              <span className="text-sm font-medium">
+                              <Paperclip className="h-4 w-4 text-slate-600" />
+                              <span className="text-sm font-medium text-slate-700">
                                 Attachments:
                               </span>
                             </div>
@@ -354,8 +634,7 @@ const PostPreview = ({
                               {post.attachments.map((attachment) => (
                                 <Badge
                                   key={attachment.id}
-                                  variant="outline"
-                                  className="flex items-center gap-1"
+                                  className="flex items-center gap-1 bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
                                 >
                                   {attachment.type === "pdf" && (
                                     <FileText className="h-3 w-3" />

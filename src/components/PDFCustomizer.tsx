@@ -70,7 +70,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
     coverTitle: "CHEROKEE MULTI-AGENCY NARCOTICS SQUAD",
     coverSubtitle: "OFFICIAL CASE FILE",
     coverDisclaimer:
-      "This document contains confidential information. Distribution is restricted to authorized personnel only.",
+      "The contents of this report have been generated for release to the requested prosecuting authority. The release of these documents has been approved by the Commander of CMANS or his/her designee. The copying or redistribution of these documents is strictly prohibited for non-official purposes. The reports in this document are in the order they were entered into the RMS system. This may result in the reports not being chronologically listed based on the date that events occurred. The Date field on each report represents the actual chronological order of events. BLANK PAGES NEVER CONTAINED CONTENT.",
     font: "Times New Roman",
     fontSize: 12,
     headerText: "CHEROKEE MULTI-AGENCY NARCOTICS SQUAD",
@@ -104,36 +104,45 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-background">
-      <Card>
-        <CardHeader>
-          <CardTitle>PDF Template Customization</CardTitle>
-          <CardDescription>
+    <div className="w-full max-w-4xl mx-auto">
+      <Card className="bg-white border-slate-200 shadow-lg rounded-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50 p-6">
+          <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
+            <svg
+              className="w-5 h-5 text-blue-600"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm12 2v8H4V6h12z" />
+            </svg>
+            PDF Template Customization
+          </CardTitle>
+          <CardDescription className="text-slate-600">
             Customize the appearance and layout of your PDF document
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-white p-6">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-4 mb-6">
-              <TabsTrigger value="layout" className="flex items-center gap-2">
+            <TabsList className="grid grid-cols-4 mb-6 bg-slate-100">
+              <TabsTrigger value="layout" className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white">
                 <Layout className="h-4 w-4" />
                 Layout
               </TabsTrigger>
-              <TabsTrigger value="cover" className="flex items-center gap-2">
+              <TabsTrigger value="cover" className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white">
                 <FileUp className="h-4 w-4" />
                 Cover Page
               </TabsTrigger>
-              <TabsTrigger value="colors" className="flex items-center gap-2">
+              <TabsTrigger value="colors" className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white">
                 <Palette className="h-4 w-4" />
                 Colors
               </TabsTrigger>
               <TabsTrigger
                 value="typography"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white"
               >
                 <Type className="h-4 w-4" />
                 Typography
@@ -143,14 +152,14 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
             <TabsContent value="layout" className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="paperSize">Paper Size</Label>
+                  <Label htmlFor="paperSize" className="text-slate-700 font-medium">Paper Size</Label>
                   <Select
                     value={settings.paperSize}
                     onValueChange={(value) =>
                       handleSettingChange("paperSize", value)
                     }
                   >
-                    <SelectTrigger id="paperSize">
+                    <SelectTrigger id="paperSize" className="text-slate-900">
                       <SelectValue placeholder="Select paper size" />
                     </SelectTrigger>
                     <SelectContent>
@@ -163,14 +172,14 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="orientation">Orientation</Label>
+                  <Label htmlFor="orientation" className="text-slate-700 font-medium">Orientation</Label>
                   <Select
                     value={settings.orientation}
                     onValueChange={(value) =>
                       handleSettingChange("orientation", value)
                     }
                   >
-                    <SelectTrigger id="orientation">
+                    <SelectTrigger id="orientation" className="text-slate-900">
                       <SelectValue placeholder="Select orientation" />
                     </SelectTrigger>
                     <SelectContent>
@@ -183,8 +192,8 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
 
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Label htmlFor="margins">Margins (mm)</Label>
-                  <span className="text-sm text-muted-foreground">
+                  <Label htmlFor="margins" className="text-slate-700 font-medium">Margins (mm)</Label>
+                  <span className="text-sm text-slate-600">
                     {settings.margins}mm
                   </span>
                 </div>
@@ -210,35 +219,37 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                     handleSettingChange("includeCoverPage", checked)
                   }
                 />
-                <Label htmlFor="includeCoverPage">Include cover page</Label>
+                <Label htmlFor="includeCoverPage" className="text-slate-700 font-medium">Include cover page</Label>
               </div>
 
               {settings.includeCoverPage && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="coverTitle">Cover Title</Label>
+                    <Label htmlFor="coverTitle" className="text-slate-700 font-medium">Cover Title</Label>
                     <Input
                       id="coverTitle"
                       value={settings.coverTitle}
                       onChange={(e) =>
                         handleSettingChange("coverTitle", e.target.value)
                       }
+                      className="text-slate-900"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="coverSubtitle">Cover Subtitle</Label>
+                    <Label htmlFor="coverSubtitle" className="text-slate-700 font-medium">Cover Subtitle</Label>
                     <Input
                       id="coverSubtitle"
                       value={settings.coverSubtitle}
                       onChange={(e) =>
                         handleSettingChange("coverSubtitle", e.target.value)
                       }
+                      className="text-slate-900"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="coverDisclaimer">Cover Disclaimer</Label>
+                    <Label htmlFor="coverDisclaimer" className="text-slate-700 font-medium">Cover Disclaimer</Label>
                     <Textarea
                       id="coverDisclaimer"
                       value={settings.coverDisclaimer}
@@ -247,11 +258,12 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                       }
                       placeholder="Enter disclaimer text that will appear below the cover image"
                       rows={3}
+                      className="text-slate-900 placeholder:text-slate-500"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="coverImage">Cover Image</Label>
+                    <Label htmlFor="coverImage" className="text-slate-700 font-medium">Cover Image</Label>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <div className="flex items-center justify-center w-full h-40 border-2 border-dashed rounded-md border-muted-foreground/25 hover:border-muted-foreground/50 cursor-pointer relative">
@@ -263,11 +275,11 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                             onChange={handleCoverImageChange}
                           />
                           <div className="flex flex-col items-center justify-center text-center p-4">
-                            <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                            <p className="text-sm text-muted-foreground">
+                            <Upload className="h-10 w-10 text-slate-400 mb-2" />
+                            <p className="text-sm text-slate-600">
                               Click to upload or drag and drop
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-slate-500">
                               PNG, JPG, GIF up to 10MB
                             </p>
                           </div>
@@ -283,8 +295,8 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                           />
                         ) : (
                           <div className="flex flex-col items-center justify-center text-center p-4">
-                            <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                            <p className="text-sm text-muted-foreground">
+                            <ImageIcon className="h-10 w-10 text-slate-400 mb-2" />
+                            <p className="text-sm text-slate-600">
                               Image preview
                             </p>
                           </div>
@@ -299,7 +311,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
             <TabsContent value="colors" className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="headerColor">Header Color</Label>
+                  <Label htmlFor="headerColor" className="text-slate-700 font-medium">Header Color</Label>
                   <div className="flex items-center gap-2">
                     <div
                       className="w-8 h-8 rounded-md border"
@@ -318,7 +330,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="footerColor">Footer Color</Label>
+                  <Label htmlFor="footerColor" className="text-slate-700 font-medium">Footer Color</Label>
                   <div className="flex items-center gap-2">
                     <div
                       className="w-8 h-8 rounded-md border"
@@ -339,7 +351,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="headerText">Header Text</Label>
+                  <Label htmlFor="headerText" className="text-slate-700 font-medium">Header Text</Label>
                   <Input
                     id="headerText"
                     value={settings.headerText}
@@ -347,11 +359,12 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                       handleSettingChange("headerText", e.target.value)
                     }
                     placeholder="Custom header text"
+                    className="text-slate-900 placeholder:text-slate-500"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="footerText">Footer Text</Label>
+                  <Label htmlFor="footerText" className="text-slate-700 font-medium">Footer Text</Label>
                   <Input
                     id="footerText"
                     value={settings.footerText}
@@ -359,6 +372,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                       handleSettingChange("footerText", e.target.value)
                     }
                     placeholder="Use {pageNumber} and {totalPages} for page numbers"
+                    className="text-slate-900 placeholder:text-slate-500"
                   />
                 </div>
               </div>
@@ -369,7 +383,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                   style={{ backgroundColor: settings.headerColor }}
                 />
                 <div className="h-40 bg-white border-x p-4">
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-slate-600">
                     Document content preview
                   </p>
                 </div>
@@ -383,14 +397,14 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
             <TabsContent value="typography" className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="font">Font Family</Label>
+                  <Label htmlFor="font" className="text-slate-700 font-medium">Font Family</Label>
                   <Select
                     value={settings.font}
                     onValueChange={(value) =>
                       handleSettingChange("font", value)
                     }
                   >
-                    <SelectTrigger id="font">
+                    <SelectTrigger id="font" className="text-slate-900">
                       <SelectValue placeholder="Select font" />
                     </SelectTrigger>
                     <SelectContent>
@@ -407,8 +421,8 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
 
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <Label htmlFor="fontSize">Font Size (pt)</Label>
-                    <span className="text-sm text-muted-foreground">
+                    <Label htmlFor="fontSize" className="text-slate-700 font-medium">Font Size (pt)</Label>
+                    <span className="text-sm text-slate-600">
                       {settings.fontSize}pt
                     </span>
                   </div>
@@ -425,9 +439,9 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                 </div>
               </div>
 
-              <div className="p-6 border rounded-md">
+              <div className="p-6 border rounded-md bg-white">
                 <p
-                  className="mb-4"
+                  className="mb-4 text-slate-800"
                   style={{
                     fontFamily: settings.font,
                     fontSize: `${settings.fontSize}px`,
@@ -436,6 +450,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                   Sample text with {settings.font} font at {settings.fontSize}pt
                 </p>
                 <p
+                  className="text-slate-700"
                   style={{
                     fontFamily: settings.font,
                     fontSize: `${settings.fontSize * 0.9}px`,
@@ -466,8 +481,8 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                 coverImage: null,
                 coverTitle: "CHEROKEE MULTI-AGENCY NARCOTICS SQUAD",
                 coverSubtitle: "OFFICIAL CASE FILE",
-                coverDisclaimer:
-                  "This document contains confidential information. Distribution is restricted to authorized personnel only.",
+                      coverDisclaimer:
+        "The contents of this report have been generated for release to the requested prosecuting authority. The release of these documents has been approved by the Commander of CMANS or his/her designee. The copying or redistribution of these documents is strictly prohibited for non-official purposes. The reports in this document are in the order they were entered into the RMS system. This may result in the reports not being chronologically listed based on the date that events occurred. The Date field on each report represents the actual chronological order of events. BLANK PAGES NEVER CONTAINED CONTENT.",
                 font: "Times New Roman",
                 fontSize: 12,
                 headerText: "CHEROKEE MULTI-AGENCY NARCOTICS SQUAD",

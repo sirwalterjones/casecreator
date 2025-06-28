@@ -85,10 +85,6 @@ export default function Home() {
             Cherokee Multi-Agency Narcotics Squad
           </p>
           
-          <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
-            Create professional case documentation with our streamlined workflow
-          </p>
-          
           {/* Progress Bar */}
           <div className="mt-8 max-w-md mx-auto">
             <div className="flex justify-between text-sm font-medium text-slate-600 mb-2">
