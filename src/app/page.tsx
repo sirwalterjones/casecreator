@@ -14,7 +14,7 @@ import PostPreview from "@/components/PostPreview";
 import PDFCustomizer from "@/components/PDFCustomizer";
 import PDFGenerator from "@/components/PDFGenerator";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, FileText, Users, Settings, Download } from "lucide-react";
 
 interface Category {
   id: number;
@@ -60,169 +60,139 @@ export default function Home() {
     else if (activeTab === "generate") setActiveTab("customize");
   };
 
+  const getStepProgress = () => {
+    const steps = ["categories", "posts", "customize", "generate"];
+    return ((steps.indexOf(activeTab) + 1) / steps.length) * 100;
+  };
+
   return (
-    <main className="min-h-screen bg-black p-6 md:p-10">
-      <div className="container mx-auto max-w-7xl">
-        {/* Header with Badge Design */}
-        <header className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full mb-4 shadow-2xl">
-            <div className="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-yellow-400"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" />
-              </svg>
-            </div>
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fill-rule=%22evenodd%22%3E%3Cg%20fill=%22%23f1f5f9%22%20fill-opacity=%220.4%22%3E%3Ccircle%20cx=%227%22%20cy=%227%22%20r=%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+      
+      <div className="relative z-10 container mx-auto max-w-6xl px-4 py-8">
+        {/* Modern Header */}
+        <header className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl mb-6 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
+            <FileText className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl mb-2">
-            CMANS Case File Generator
+          
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-slate-800 via-blue-700 to-indigo-800 bg-clip-text text-transparent mb-4">
+            Case File Generator
           </h1>
-          <div className="text-yellow-400 font-semibold text-lg mb-2">
+          
+          <p className="text-xl text-slate-600 mb-2 font-medium">
             Cherokee Multi-Agency Narcotics Squad
-          </div>
-          <p className="text-slate-300 max-w-2xl mx-auto">
-            Professional case file documentation system for law enforcement
-            operations
           </p>
-          <div className="mt-4 inline-flex items-center px-4 py-2 bg-red-600/20 border border-red-500/30 rounded-full text-red-300 text-sm font-medium">
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            CONFIDENTIAL - LAW ENFORCEMENT USE ONLY
+          
+          <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
+            Create professional case documentation with our streamlined workflow
+          </p>
+          
+          {/* Progress Bar */}
+          <div className="mt-8 max-w-md mx-auto">
+            <div className="flex justify-between text-sm font-medium text-slate-600 mb-2">
+              <span>Progress</span>
+              <span>{Math.round(getStepProgress())}%</span>
+            </div>
+            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${getStepProgress()}%` }}
+              ></div>
+            </div>
           </div>
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 bg-slate-800/50 border border-slate-700 p-2 rounded-xl">
-            <TabsTrigger
-              value="categories"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 font-medium transition-all duration-200 rounded-lg"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">
-                  1
+          {/* Modern Tab Navigation */}
+          <div className="mb-8 p-2 bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+            <TabsList className="grid w-full grid-cols-4 bg-transparent p-0 h-auto gap-2">
+              <TabsTrigger
+                value="categories"
+                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 data-[state=active]:bg-white/20">
+                  <Users className="w-6 h-6 text-blue-600 data-[state=active]:text-white" />
                 </div>
-                Select Case Number
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="posts"
-              disabled={selectedCategories.length === 0}
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 font-medium transition-all duration-200 rounded-lg disabled:opacity-50"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-slate-600 text-white text-xs flex items-center justify-center font-bold">
-                  2
+                <div className="text-center">
+                  <div className="font-semibold text-sm">Select Source</div>
+                  <div className="text-xs opacity-70">Choose case data</div>
                 </div>
-                Preview Reports
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="customize"
-              disabled={selectedPosts.length === 0}
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 font-medium transition-all duration-200 rounded-lg disabled:opacity-50"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-slate-600 text-white text-xs flex items-center justify-center font-bold">
-                  3
+              </TabsTrigger>
+              
+              <TabsTrigger
+                value="posts"
+                disabled={selectedCategories.length === 0}
+                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 data-[state=active]:bg-white/20">
+                  <FileText className="w-6 h-6 text-emerald-600 data-[state=active]:text-white" />
                 </div>
-                Customize File
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="generate"
-              disabled={Object.keys(pdfSettings).length === 0}
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-300 font-medium transition-all duration-200 rounded-lg disabled:opacity-50"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-slate-600 text-white text-xs flex items-center justify-center font-bold">
-                  4
+                <div className="text-center">
+                  <div className="font-semibold text-sm">Review Content</div>
+                  <div className="text-xs opacity-70">Preview reports</div>
                 </div>
-                Generate File
-              </div>
-            </TabsTrigger>
-          </TabsList>
+              </TabsTrigger>
+              
+              <TabsTrigger
+                value="customize"
+                disabled={selectedPosts.length === 0}
+                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 data-[state=active]:bg-white/20">
+                  <Settings className="w-6 h-6 text-purple-600 data-[state=active]:text-white" />
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-sm">Customize</div>
+                  <div className="text-xs opacity-70">Format options</div>
+                </div>
+              </TabsTrigger>
+              
+              <TabsTrigger
+                value="generate"
+                disabled={Object.keys(pdfSettings).length === 0}
+                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 data-[state=active]:bg-white/20">
+                  <Download className="w-6 h-6 text-orange-600 data-[state=active]:text-white" />
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-sm">Generate</div>
+                  <div className="text-xs opacity-70">Create PDF</div>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <Card className="border border-slate-700/50 shadow-2xl bg-slate-800/30 backdrop-blur-sm">
-            <CardHeader className="pb-4 bg-gradient-to-r from-slate-800/50 to-blue-900/30 border-b border-slate-700/50">
-              <CardTitle className="text-white text-xl font-bold flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-                  {activeTab === "categories" && (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                    </svg>
-                  )}
-                  {activeTab === "posts" && (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                  {activeTab === "customize" && (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                  {activeTab === "generate" && (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
+          {/* Content Card */}
+          <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border-b border-slate-200/50 p-8">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+                  {activeTab === "categories" && <Users className="w-6 h-6 text-white" />}
+                  {activeTab === "posts" && <FileText className="w-6 h-6 text-white" />}
+                  {activeTab === "customize" && <Settings className="w-6 h-6 text-white" />}
+                  {activeTab === "generate" && <Download className="w-6 h-6 text-white" />}
                 </div>
-                {activeTab === "categories" && "Case Source Selection"}
-                {activeTab === "posts" && "Case Report Preview"}
-                {activeTab === "customize" && "Document Template Configuration"}
-                {activeTab === "generate" && "Case File Generation"}
-              </CardTitle>
-              <CardDescription className="text-slate-400">
-                {activeTab === "categories" &&
-                  "Select case number for case file compilation"}
-                {activeTab === "posts" &&
-                  "Review and select specific reports for inclusion in case file"}
-                {activeTab === "customize" &&
-                  "Configure document formatting and security parameters"}
-                {activeTab === "generate" &&
-                  "Generate secure case file documentation"}
-              </CardDescription>
+                <div>
+                  <CardTitle className="text-2xl font-bold text-slate-800 mb-1">
+                    {activeTab === "categories" && "Source Selection"}
+                    {activeTab === "posts" && "Content Review"}
+                    {activeTab === "customize" && "Document Customization"}
+                    {activeTab === "generate" && "File Generation"}
+                  </CardTitle>
+                  <CardDescription className="text-slate-600 text-base">
+                    {activeTab === "categories" && "Choose your case data source and select the case number"}
+                    {activeTab === "posts" && "Review available reports and select which ones to include"}
+                    {activeTab === "customize" && "Configure your document formatting and layout preferences"}
+                    {activeTab === "generate" && "Generate and download your professional case file"}
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="bg-slate-900/20">
+            
+            <CardContent className="p-8">
               <TabsContent value="categories" className="mt-0">
                 <CategorySelector
                   onCategoriesSelected={(categories, url) => {
@@ -263,27 +233,30 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-between mt-6">
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center mt-8">
             <Button
               variant="outline"
               onClick={handlePreviousStep}
               disabled={activeTab === "categories"}
-              className="flex items-center gap-2 bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200"
+              className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm border-slate-300 text-slate-700 hover:bg-white hover:text-slate-900 rounded-xl shadow-lg transition-all duration-200 disabled:opacity-40"
             >
-              <ChevronLeft className="h-4 w-4" /> Previous Step
+              <ChevronLeft className="h-4 w-4" /> Previous
             </Button>
+
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span>Step {["categories", "posts", "customize", "generate"].indexOf(activeTab) + 1} of 4</span>
+            </div>
 
             <Button
               onClick={handleNextStep}
               disabled={
-                (activeTab === "categories" &&
-                  selectedCategories.length === 0) ||
+                (activeTab === "categories" && selectedCategories.length === 0) ||
                 (activeTab === "posts" && selectedPosts.length === 0) ||
-                (activeTab === "customize" &&
-                  Object.keys(pdfSettings).length === 0) ||
+                (activeTab === "customize" && Object.keys(pdfSettings).length === 0) ||
                 activeTab === "generate"
               }
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-2 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
             >
               {activeTab !== "generate" ? (
                 <>
@@ -291,18 +264,8 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Download Case File
+                  <Download className="w-4 h-4" />
+                  Download File
                 </>
               )}
             </Button>
