@@ -86,6 +86,25 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
       : { r: 0, g: 0, b: 0 };
   };
 
+  // Helper function to safely validate text for jsPDF
+  const safeText = (text: any): string => {
+    if (text === null || text === undefined) return '';
+    if (typeof text === 'string') return text;
+    return String(text);
+  };
+
+  // Helper function to safely split text
+  const safeSplitText = (pdf: jsPDF, text: any, maxWidth: number): string[] => {
+    const safeTextValue = safeText(text);
+    if (!safeTextValue) return [''];
+    try {
+      return pdf.splitTextToSize(safeTextValue, maxWidth);
+    } catch (error) {
+      console.warn('Error splitting text:', error);
+      return [safeTextValue];
+    }
+  };
+
   // Check if text is a field label that should be bolded
   const isFieldLabel = (text: string): boolean => {
     const trimmedText = text.trim();
@@ -503,10 +522,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFont("times", "bold");
         pdf.setFontSize(10);
         pdf.setTextColor(255, 255, 255);
-        pdf.text(templateSettings.headerText, margins, 12);
+        pdf.text(safeText(templateSettings.headerText), margins, 12);
         
         // Add case number to top right
-        const coverCaseText = `Case #: ${categoryName || 'General'}`;
+        const coverCaseText = `Case #: ${safeText(categoryName) || 'General'}`;
         const coverCaseTextWidth = pdf.getTextWidth(coverCaseText);
         pdf.text(coverCaseText, pageWidth - margins - coverCaseTextWidth, 12);
         
@@ -523,21 +542,27 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setTextColor(0, 0, 0);
         pdf.setFont("times", "bold");
         pdf.setFontSize(24);
-        const titleLines = pdf.splitTextToSize(templateSettings.coverTitle, contentWidth);
+        const titleLines = safeSplitText(pdf, templateSettings.coverTitle, contentWidth);
         let yPos = 110; // Always position after logo
         titleLines.forEach((line: string) => {
-          const lineWidth = pdf.getTextWidth(line);
-          pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
+          const safeLineText = safeText(line);
+          if (safeLineText) {
+            const lineWidth = pdf.getTextWidth(safeLineText);
+            pdf.text(safeLineText, (pageWidth - lineWidth) / 2, yPos);
+          }
           yPos += 12;
         });
 
         // Subtitle
         pdf.setFontSize(16);
         yPos += 10;
-        const subtitleLines = pdf.splitTextToSize(templateSettings.coverSubtitle, contentWidth);
+        const subtitleLines = safeSplitText(pdf, templateSettings.coverSubtitle, contentWidth);
         subtitleLines.forEach((line: string) => {
-          const lineWidth = pdf.getTextWidth(line);
-          pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
+          const safeLineText = safeText(line);
+          if (safeLineText) {
+            const lineWidth = pdf.getTextWidth(safeLineText);
+            pdf.text(safeLineText, (pageWidth - lineWidth) / 2, yPos);
+          }
           yPos += 8;
         });
 
@@ -547,7 +572,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFontSize(12);
         
         const generatedText = `Generated: ${formatDate()}`;
-        const caseText = `Case #: ${categoryName || 'General'}`;
+        const caseText = `Case #: ${safeText(categoryName) || 'General'}`;
         const reportsText = `Total Reports: ${selectedPosts.length}`;
         
         // Center each line
@@ -562,10 +587,13 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         // Disclaimer - centered
         yPos = pageHeight - 60;
         pdf.setFontSize(10);
-        const disclaimerLines = pdf.splitTextToSize(templateSettings.coverDisclaimer, contentWidth);
+        const disclaimerLines = safeSplitText(pdf, templateSettings.coverDisclaimer, contentWidth);
         disclaimerLines.forEach((line: string) => {
-          const lineWidth = pdf.getTextWidth(line);
-          pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
+          const safeLineText = safeText(line);
+          if (safeLineText) {
+            const lineWidth = pdf.getTextWidth(safeLineText);
+            pdf.text(safeLineText, (pageWidth - lineWidth) / 2, yPos);
+          }
           yPos += 5;
         });
 
@@ -620,10 +648,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFont("times", "bold");
         pdf.setFontSize(10);
         pdf.setTextColor(255, 255, 255);
-        pdf.text(templateSettings.headerText, margins, 12);
+        pdf.text(safeText(templateSettings.headerText), margins, 12);
         
         // Add case number to top right
-        const caseText = `Case #: ${categoryName || 'General'}`;
+        const caseText = `Case #: ${safeText(categoryName) || 'General'}`;
         const caseTextWidth = pdf.getTextWidth(caseText);
         pdf.text(caseText, pageWidth - margins - caseTextWidth, 12);
         
@@ -652,11 +680,11 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
               break;
             case 'paragraph':
               // Estimate based on text length and wrapping
-              const paragraphLines = pdf.splitTextToSize(item.text, contentWidth);
+              const paragraphLines = safeSplitText(pdf, item.text, contentWidth);
               estimatedHeight = paragraphLines.length * lineHeight + 5;
               break;
             case 'list':
-              const listLines = pdf.splitTextToSize(item.text, contentWidth - 10);
+              const listLines = safeSplitText(pdf, item.text, contentWidth - 10);
               estimatedHeight = listLines.length * lineHeight + 5;
               break;
             default:
@@ -671,7 +699,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setFont("times", "normal");
             pdf.setFontSize(8);
             pdf.setTextColor(255, 255, 255);
-            pdf.text(templateSettings.footerText, margins, pageHeight - 4);
+            pdf.text(safeText(templateSettings.footerText), margins, pageHeight - 4);
             
             pdf.addPage();
             currentPageCount++; // Track new page
@@ -682,10 +710,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setFont("times", "bold");
             pdf.setFontSize(10);
             pdf.setTextColor(255, 255, 255);
-            pdf.text(templateSettings.headerText, margins, 12);
+            pdf.text(safeText(templateSettings.headerText), margins, 12);
             
             // Add case number to top right
-            const caseText = `Case #: ${categoryName || 'General'}`;
+            const caseText = `Case #: ${safeText(categoryName) || 'General'}`;
             const caseTextWidth = pdf.getTextWidth(caseText);
             pdf.text(caseText, pageWidth - margins - caseTextWidth, 12);
             
@@ -699,14 +727,17 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
               pdf.setFontSize(headingSize);
               pdf.setTextColor(0, 0, 0);
               
-              const headingLines = pdf.splitTextToSize(item.text, contentWidth);
+              const headingLines = safeSplitText(pdf, item.text, contentWidth);
               headingLines.forEach((line: string) => {
-                if (item.centered) {
-                  const lineWidth = pdf.getTextWidth(line);
-                  const xPos = margins + (contentWidth - lineWidth) / 2;
-                  pdf.text(line, xPos, yPos);
-                } else {
-                  pdf.text(line, margins, yPos);
+                const safeLineText = safeText(line);
+                if (safeLineText) {
+                  if (item.centered) {
+                    const lineWidth = pdf.getTextWidth(safeLineText);
+                    const xPos = margins + (contentWidth - lineWidth) / 2;
+                    pdf.text(safeLineText, xPos, yPos);
+                  } else {
+                    pdf.text(safeLineText, margins, yPos);
+                  }
                 }
                 yPos += headingSize * 0.6;
               });
@@ -718,9 +749,12 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
               pdf.setFontSize(templateSettings.fontSize);
               pdf.setTextColor(0, 0, 0);
               
-              const labelLines = pdf.splitTextToSize(item.text, contentWidth);
+              const labelLines = safeSplitText(pdf, item.text, contentWidth);
               labelLines.forEach((line: string) => {
-                pdf.text(line, margins, yPos);
+                const safeLineText = safeText(line);
+                if (safeLineText) {
+                  pdf.text(safeLineText, margins, yPos);
+                }
                 yPos += lineHeight;
               });
               yPos += 3;
@@ -731,9 +765,12 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
               pdf.setFontSize(templateSettings.fontSize);
               pdf.setTextColor(0, 0, 0);
               
-              const paragraphLines = pdf.splitTextToSize(item.text, contentWidth);
+              const paragraphLines = safeSplitText(pdf, item.text, contentWidth);
               paragraphLines.forEach((line: string) => {
-                pdf.text(line, margins, yPos);
+                const safeLineText = safeText(line);
+                if (safeLineText) {
+                  pdf.text(safeLineText, margins, yPos);
+                }
                 yPos += lineHeight;
               });
               yPos += 3;
@@ -744,10 +781,13 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
               pdf.setFontSize(templateSettings.fontSize);
               pdf.setTextColor(0, 0, 0);
               
-              const listLines = pdf.splitTextToSize(item.text, contentWidth - 10);
+              const listLines = safeSplitText(pdf, item.text, contentWidth - 10);
               pdf.text("•", margins, yPos);
               listLines.forEach((line: string) => {
-                pdf.text(line, margins + 8, yPos);
+                const safeLineText = safeText(line);
+                if (safeLineText) {
+                  pdf.text(safeLineText, margins + 8, yPos);
+                }
                 yPos += lineHeight;
               });
               yPos += 2;
@@ -811,7 +851,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setFont("times", "normal");
             pdf.setFontSize(8);
             pdf.setTextColor(255, 255, 255);
-            pdf.text(templateSettings.footerText, margins, pageHeight - 4);
+            pdf.text(safeText(templateSettings.footerText), margins, pageHeight - 4);
             
             pdf.addPage();
             
@@ -821,10 +861,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setFont("times", "bold");
             pdf.setFontSize(10);
             pdf.setTextColor(255, 255, 255);
-            pdf.text(templateSettings.headerText, margins, 12);
+            pdf.text(safeText(templateSettings.headerText), margins, 12);
             
             // Add case number to top right
-            const caseText = `Case #: ${categoryName || 'General'}`;
+            const caseText = `Case #: ${safeText(categoryName) || 'General'}`;
             const caseTextWidth = pdf.getTextWidth(caseText);
             pdf.text(caseText, pageWidth - margins - caseTextWidth, 12);
             
@@ -871,7 +911,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setFont("times", "normal");
             pdf.setFontSize(10);
             
-            const attachmentText = `${index + 1}. ${filename}`;
+            const attachmentText = `${index + 1}. ${safeText(filename)}`;
             pdf.text(attachmentText, margins + 5, yPos);
             
             // Add visual underline to indicate it's a clickable link
@@ -907,7 +947,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
           pdf.setFont("times", "normal");
           pdf.setFontSize(8);
           pdf.setTextColor(255, 255, 255);
-          pdf.text(templateSettings.footerText, margins, pageHeight - 5);
+          pdf.text(safeText(templateSettings.footerText), margins, pageHeight - 5);
           
           // Force new page for next post
           pdf.addPage();
@@ -919,10 +959,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
           pdf.setFont("times", "bold");
           pdf.setFontSize(10);
           pdf.setTextColor(255, 255, 255);
-          pdf.text(templateSettings.headerText, margins, 12);
+          pdf.text(safeText(templateSettings.headerText), margins, 12);
           
           // Add case number to top right
-          const caseText = `Case #: ${categoryName || 'General'}`;
+          const caseText = `Case #: ${safeText(categoryName) || 'General'}`;
           const caseTextWidth = pdf.getTextWidth(caseText);
           pdf.text(caseText, pageWidth - margins - caseTextWidth, 12);
           
@@ -944,10 +984,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFont("times", "bold");
         pdf.setFontSize(10);
         pdf.setTextColor(255, 255, 255);
-        pdf.text(templateSettings.headerText, margins, 12);
+        pdf.text(safeText(templateSettings.headerText), margins, 12);
         
         // Add case number to top right
-        const tocCaseText = `Case #: ${categoryName || 'General'}`;
+        const tocCaseText = `Case #: ${safeText(categoryName) || 'General'}`;
         const tocCaseTextWidth = pdf.getTextWidth(tocCaseText);
         pdf.text(tocCaseText, pageWidth - margins - tocCaseTextWidth, 12);
         
@@ -975,7 +1015,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setFont("times", "normal");
             pdf.setFontSize(8);
             pdf.setTextColor(255, 255, 255);
-            pdf.text(templateSettings.footerText, margins, pageHeight - 4);
+            pdf.text(safeText(templateSettings.footerText), margins, pageHeight - 4);
             
             pdf.addPage();
             
@@ -985,10 +1025,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setFont("times", "bold");
             pdf.setFontSize(10);
             pdf.setTextColor(255, 255, 255);
-            pdf.text(templateSettings.headerText, margins, 12);
+            pdf.text(safeText(templateSettings.headerText), margins, 12);
             
             // Add case number to top right
-            const tocCaseText2 = `Case #: ${categoryName || 'General'}`;
+            const tocCaseText2 = `Case #: ${safeText(categoryName) || 'General'}`;
             const tocCaseTextWidth2 = pdf.getTextWidth(tocCaseText2);
             pdf.text(tocCaseText2, pageWidth - margins - tocCaseTextWidth2, 12);
             
@@ -1011,14 +1051,17 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
           
           // Split long titles to fit on page (leave space for page number)
           const availableWidth = contentWidth - pageNumWidth - 40;
-          const titleLines = pdf.splitTextToSize(displayTitle, availableWidth);
+          const titleLines = safeSplitText(pdf, displayTitle, availableWidth);
           
           // Print report number
           pdf.text(reportNum, margins, tocYPos);
           
           // Print title (indented)
           titleLines.forEach((line: string, lineIndex: number) => {
-            pdf.text(line, margins + 20, tocYPos + (lineIndex * 5));
+            const safeLineText = safeText(line);
+            if (safeLineText) {
+              pdf.text(safeLineText, margins + 20, tocYPos + (lineIndex * 5));
+            }
           });
           
           // Print page number (right-aligned)
@@ -1042,7 +1085,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFont("times", "normal");
         pdf.setFontSize(8);
         pdf.setTextColor(255, 255, 255);
-        pdf.text(templateSettings.footerText, margins, pageHeight - 4);
+        pdf.text(safeText(templateSettings.footerText), margins, pageHeight - 4);
       }
 
       setCurrentStep("Finalizing document...");
@@ -1059,10 +1102,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
           pdf.setFont("times", "bold");
           pdf.setFontSize(10);
           pdf.setTextColor(255, 255, 255);
-          pdf.text(templateSettings.headerText, margins, 12);
+          pdf.text(safeText(templateSettings.headerText), margins, 12);
           
           // Add case number to top right
-          const caseText = `Case #: ${categoryName || 'General'}`;
+          const caseText = `Case #: ${safeText(categoryName) || 'General'}`;
           const caseTextWidth = pdf.getTextWidth(caseText);
           pdf.text(caseText, pageWidth - margins - caseTextWidth, 12);
           
@@ -1075,7 +1118,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
           pdf.setTextColor(255, 255, 255);
           
           // Left-aligned footer text
-          pdf.text(templateSettings.footerText, margins, pageHeight - 4);
+          pdf.text(safeText(templateSettings.footerText), margins, pageHeight - 4);
           
           // Right-aligned page numbers
           const pageText = `Page ${i} of ${totalPages}`;
@@ -1112,7 +1155,17 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
 
     } catch (err) {
       console.error("PDF generation error:", err);
-      setError(err instanceof Error ? err.message : "An error occurred during PDF generation");
+      let errorMessage = "An error occurred during PDF generation";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        // Check for specific jsPDF text errors
+        if (err.message.includes("Invalid arguments passed to jsPDF.text")) {
+          errorMessage = "PDF generation failed due to invalid text content. Please check your post content for special characters or formatting issues.";
+        }
+      }
+      
+      setError(errorMessage);
       setIsGenerating(false);
       setCurrentStep("");
       setProgress(0);
