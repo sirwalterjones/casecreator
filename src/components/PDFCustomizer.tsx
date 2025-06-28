@@ -25,7 +25,6 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import {
-  Upload,
   FileUp,
   Image as ImageIcon,
   Layout,
@@ -78,9 +77,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
   });
 
   const [activeTab, setActiveTab] = useState("layout");
-  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
-    null,
-  );
+
 
   const handleSettingChange = <K extends keyof PDFSettings>(
     key: K,
@@ -91,17 +88,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
     onSettingsChange(newSettings);
   };
 
-  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    if (file) {
-      handleSettingChange("coverImage", file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCoverImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -263,44 +250,16 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="coverImage" className="text-slate-700 font-medium">Cover Image</Label>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center justify-center w-full h-40 border-2 border-dashed rounded-md border-muted-foreground/25 hover:border-muted-foreground/50 cursor-pointer relative">
-                          <input
-                            type="file"
-                            id="coverImage"
-                            accept="image/*"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            onChange={handleCoverImageChange}
-                          />
-                          <div className="flex flex-col items-center justify-center text-center p-4">
-                            <Upload className="h-10 w-10 text-slate-400 mb-2" />
-                            <p className="text-sm text-slate-600">
-                              Click to upload or drag and drop
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              PNG, JPG, GIF up to 10MB
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-center w-full h-40 border rounded-md bg-muted/20">
-                        {coverImagePreview ? (
-                          <img
-                            src={coverImagePreview}
-                            alt="Cover preview"
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center text-center p-4">
-                            <ImageIcon className="h-10 w-10 text-slate-400 mb-2" />
-                            <p className="text-sm text-slate-600">
-                              Image preview
-                            </p>
-                          </div>
-                        )}
+                    <Label className="text-slate-700 font-medium">Cover Image</Label>
+                    <div className="flex items-center justify-center w-full h-40 border rounded-md bg-muted/20">
+                      <div className="flex flex-col items-center justify-center text-center p-4">
+                        <ImageIcon className="h-10 w-10 text-slate-400 mb-2" />
+                        <p className="text-sm text-slate-600">
+                          Default CMANS Logo
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          (Cannot be changed)
+                        </p>
                       </div>
                     </div>
                   </div>

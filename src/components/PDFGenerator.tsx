@@ -436,7 +436,34 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
     });
   };
 
-  // Default badge functionality removed to avoid PNG corruption issues
+  // Function to load the default logo image
+  const loadDefaultLogo = (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+        
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        try {
+          const dataURL = canvas.toDataURL('image/png');
+          resolve(dataURL);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      img.onerror = () => reject(new Error('Failed to load default logo'));
+      img.src = '/images/cropped-newestcmanslogo.png';
+    });
+  };
 
   // Main PDF generation function
   const generateProfessionalPDF = async () => {
@@ -483,15 +510,13 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         const coverCaseTextWidth = pdf.getTextWidth(coverCaseText);
         pdf.text(coverCaseText, pageWidth - margins - coverCaseTextWidth, 12);
         
-        // Cover image (only if provided by user)
-        if (templateSettings.coverImage) {
-          try {
-            const base64Image = await convertImageToBase64(templateSettings.coverImage);
-            pdf.addImage(base64Image, 'JPEG', pageWidth/2 - 25, 40, 50, 50);
-          } catch (e) {
-            console.warn('Failed to add cover image:', e);
-            // Skip image if it fails to load
-          }
+        // Always use the default CMANS logo
+        try {
+          const defaultLogo = await loadDefaultLogo();
+          pdf.addImage(defaultLogo, 'PNG', pageWidth/2 - 25, 40, 50, 50);
+        } catch (e) {
+          console.warn('Failed to add default logo:', e);
+          // Continue without logo if it fails to load
         }
 
         // Title
@@ -499,7 +524,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFont("times", "bold");
         pdf.setFontSize(24);
         const titleLines = pdf.splitTextToSize(templateSettings.coverTitle, contentWidth);
-        let yPos = templateSettings.coverImage ? 110 : 60;
+        let yPos = 110; // Always position after logo
         titleLines.forEach((line: string) => {
           const lineWidth = pdf.getTextWidth(line);
           pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
