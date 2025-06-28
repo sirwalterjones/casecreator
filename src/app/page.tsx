@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronRight, ChevronLeft, FileText, Users, Settings, Download, Lock, Shield } from "lucide-react";
+import Image from "next/image";
 
 interface Category {
   id: number;
@@ -63,8 +64,14 @@ const PasswordProtection = ({ onAuthenticated }: { onAuthenticated: () => void }
       <div className="relative z-10 w-full max-w-md">
         <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border-b border-slate-200/50 p-6 sm:p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-xl mx-auto">
-              <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-xl mx-auto p-2 sm:p-3">
+              <Image
+                src="/images/cropped-newestcmanslogo.png"
+                alt="CMANS Logo"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+              />
             </div>
             
             <CardTitle className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
@@ -169,8 +176,14 @@ export default function Home() {
       <div className="relative z-10 container mx-auto max-w-6xl px-2 sm:px-4 py-4 sm:py-8">
         {/* Modern Header */}
         <header className="text-center mb-6 sm:mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
-            <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-24 sm:h-24 bg-white rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300 p-2 sm:p-3">
+            <Image
+              src="/images/cropped-newestcmanslogo.png"
+              alt="CMANS Logo"
+              width={80}
+              height={80}
+              className="w-full h-full object-contain"
+            />
           </div>
           
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-slate-800 via-blue-700 to-indigo-800 bg-clip-text text-transparent mb-2 sm:mb-4 px-2">
