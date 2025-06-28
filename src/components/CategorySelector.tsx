@@ -312,18 +312,17 @@ const CategorySelector = ({
   );
 
   return (
-    <Card className="w-full h-full bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg rounded-xl sm:rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50 p-4 sm:p-6">
-        <CardTitle className="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2">
+    <Card className="w-full h-full bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50 p-6">
+        <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
           <svg
-            className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
+            className="w-5 h-5 text-blue-600"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span className="hidden sm:inline">Case Number Selection</span>
-          <span className="sm:hidden">Select Case</span>
+          Case Number Selection
         </CardTitle>
 
         {/* Remote URL Input */}
@@ -334,15 +333,14 @@ const CategorySelector = ({
               htmlFor="remote-url"
               className="text-sm font-medium text-slate-700"
             >
-              <span className="hidden sm:inline">Case Source URL</span>
-              <span className="sm:hidden">Source URL</span>
+              Case Source URL
             </Label>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex gap-2">
             <div className="flex-1">
               <Input
                 id="remote-url"
-                placeholder="https://cmansrms.us"
+                placeholder="https://cmansrms.us or https://intelligence-source.com"
                 value={remoteUrl}
                 onChange={(e) => handleUrlChange(e.target.value)}
                 className={`bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20 ${!isValidUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400/20" : ""}`}
@@ -357,7 +355,7 @@ const CategorySelector = ({
               onClick={handleFetchCategories}
               disabled={!isValidUrl || loading}
               size="sm"
-              className="shrink-0 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 w-full sm:w-auto"
+              className="shrink-0 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -379,7 +377,7 @@ const CategorySelector = ({
           />
         </div>
       </CardHeader>
-      <CardContent className="bg-white/40 backdrop-blur-sm p-4 sm:p-6">
+      <CardContent className="bg-white/40 backdrop-blur-sm p-6">
         {error && (
           <Alert className="mb-4 border-red-200 bg-red-50/80 text-red-800">
             <AlertCircle className="h-4 w-4 text-red-600" />
@@ -392,7 +390,7 @@ const CategorySelector = ({
             <div className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
               <p className="text-slate-600">
-                Fetching Case Numbers...
+                Fetching case numbers...
               </p>
             </div>
           </div>
@@ -410,12 +408,12 @@ const CategorySelector = ({
             )}
           </div>
         ) : (
-          <ScrollArea className="h-[300px] sm:h-[450px] pr-2 sm:pr-4">
+          <ScrollArea className="h-[450px] pr-4">
             <div className="space-y-2">
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-blue-50/70 border border-slate-200/60 hover:border-blue-300/50 transition-all duration-200 bg-white/60 backdrop-blur-sm shadow-sm"
+                  className="flex items-center space-x-3 p-4 rounded-xl hover:bg-blue-50/70 border border-slate-200/60 hover:border-blue-300/50 transition-all duration-200 bg-white/60 backdrop-blur-sm shadow-sm"
                 >
                   <Checkbox
                     id={`category-${category.id}`}
@@ -425,10 +423,10 @@ const CategorySelector = ({
                   />
                   <Label
                     htmlFor={`category-${category.id}`}
-                    className="flex-1 cursor-pointer flex flex-col sm:flex-row sm:justify-between text-slate-700 hover:text-slate-900 gap-1 sm:gap-0"
+                    className="flex-1 cursor-pointer flex justify-between text-slate-700 hover:text-slate-900"
                   >
-                    <span className="font-medium text-sm sm:text-base">{category.name}</span>
-                    <span className="text-slate-500 text-xs sm:text-sm bg-slate-100 px-2 py-1 rounded-full self-start sm:self-center">
+                    <span className="font-medium">{category.name}</span>
+                    <span className="text-slate-500 text-sm bg-slate-100 px-2 py-1 rounded-full">
                       {category.count} posts
                     </span>
                   </Label>

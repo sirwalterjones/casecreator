@@ -92,11 +92,11 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <Card className="bg-white border-slate-200 shadow-lg rounded-xl sm:rounded-2xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50 p-4 sm:p-6">
-          <CardTitle className="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2">
+      <Card className="bg-white border-slate-200 shadow-lg rounded-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50 p-6">
+          <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
             <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
+              className="w-5 h-5 text-blue-600"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -104,40 +104,40 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
             </svg>
             PDF Template Customization
           </CardTitle>
-          <CardDescription className="text-slate-600 text-sm sm:text-base">
+          <CardDescription className="text-slate-600">
             Customize the appearance and layout of your PDF document
           </CardDescription>
         </CardHeader>
-        <CardContent className="bg-white p-4 sm:p-6">
+        <CardContent className="bg-white p-6">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-2 sm:grid-cols-4 mb-4 sm:mb-6 bg-slate-100">
-              <TabsTrigger value="layout" className="flex items-center gap-1 sm:gap-2 text-slate-700 data-[state=active]:text-white p-2 sm:p-3">
-                <Layout className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Layout</span>
+            <TabsList className="grid grid-cols-4 mb-6 bg-slate-100">
+              <TabsTrigger value="layout" className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white">
+                <Layout className="h-4 w-4" />
+                Layout
               </TabsTrigger>
-              <TabsTrigger value="cover" className="flex items-center gap-1 sm:gap-2 text-slate-700 data-[state=active]:text-white p-2 sm:p-3">
-                <FileUp className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Cover</span>
+              <TabsTrigger value="cover" className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white">
+                <FileUp className="h-4 w-4" />
+                Cover Page
               </TabsTrigger>
-              <TabsTrigger value="colors" className="flex items-center gap-1 sm:gap-2 text-slate-700 data-[state=active]:text-white p-2 sm:p-3">
-                <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Colors</span>
+              <TabsTrigger value="colors" className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white">
+                <Palette className="h-4 w-4" />
+                Colors
               </TabsTrigger>
               <TabsTrigger
                 value="typography"
-                className="flex items-center gap-1 sm:gap-2 text-slate-700 data-[state=active]:text-white p-2 sm:p-3"
+                className="flex items-center gap-2 text-slate-700 data-[state=active]:text-white"
               >
-                <Type className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Typography</span>
+                <Type className="h-4 w-4" />
+                Typography
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="layout" className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <TabsContent value="layout" className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="paperSize" className="text-slate-700 font-medium">Paper Size</Label>
                   <Select
@@ -197,7 +197,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
               </div>
             </TabsContent>
 
-            <TabsContent value="cover" className="space-y-4 sm:space-y-6">
+            <TabsContent value="cover" className="space-y-6">
               <div className="flex items-center space-x-2">
                 <Switch
                   id="includeCoverPage"
@@ -267,8 +267,8 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
               )}
             </TabsContent>
 
-            <TabsContent value="colors" className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <TabsContent value="colors" className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="headerColor" className="text-slate-700 font-medium">Header Color</Label>
                   <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                       onChange={(e) =>
                         handleSettingChange("headerColor", e.target.value)
                       }
-                      className="w-full h-10 bg-white border-slate-300"
+                      className="w-full h-10"
                     />
                   </div>
                 </div>
@@ -302,13 +302,13 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                       onChange={(e) =>
                         handleSettingChange("footerColor", e.target.value)
                       }
-                      className="w-full h-10 bg-white border-slate-300"
+                      className="w-full h-10"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="headerText" className="text-slate-700 font-medium">Header Text</Label>
                   <Input
@@ -353,8 +353,8 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
               </div>
             </TabsContent>
 
-            <TabsContent value="typography" className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <TabsContent value="typography" className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="font" className="text-slate-700 font-medium">Font Family</Label>
                   <Select
@@ -426,7 +426,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
 
         <Separator className="my-2" />
 
-        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 p-4 sm:p-6">
+        <CardFooter className="flex justify-between">
           <Button
             variant="outline"
             onClick={() =>
@@ -448,11 +448,10 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                 footerText: "DO NOT RELEASE WITHOUT COMMANDER APPROVAL",
               })
             }
-            className="w-full sm:w-auto"
           >
             Reset to Default
           </Button>
-          <Button onClick={onPreview} className="w-full sm:w-auto">Preview PDF</Button>
+          <Button onClick={onPreview}>Preview PDF</Button>
         </CardFooter>
       </Card>
     </div>

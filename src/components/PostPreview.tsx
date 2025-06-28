@@ -470,11 +470,11 @@ const PostPreview = ({
   };
 
   return (
-    <div className="w-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg rounded-xl sm:rounded-2xl p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
+    <div className="w-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg rounded-2xl p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <svg
-            className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600"
+            className="w-6 h-6 text-blue-600"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -484,39 +484,36 @@ const PostPreview = ({
               clipRule="evenodd"
             />
           </svg>
-          <span className="hidden sm:inline">Case Report Preview</span>
-          <span className="sm:hidden">Reports</span>
+          Case Report Preview
         </h2>
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleSelectAll}
-            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-all duration-200 flex-1 sm:flex-none"
+            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-all duration-200"
           >
-            <span className="hidden sm:inline">Select All Reports</span>
-            <span className="sm:hidden">Select All</span>
+            Select All Reports
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={handleDeselectAll}
-            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200 flex-1 sm:flex-none"
+            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200"
           >
-            <span className="hidden sm:inline">Deselect All</span>
-            <span className="sm:hidden">Deselect</span>
+            Deselect All
           </Button>
         </div>
       </div>
 
       {selectedCategories.length > 0 && (
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50/70 border border-blue-200/50 rounded-lg sm:rounded-xl backdrop-blur-sm">
-          <p className="text-xs sm:text-sm font-medium mb-2 text-slate-700">
+        <div className="mb-6 p-4 bg-blue-50/70 border border-blue-200/50 rounded-xl backdrop-blur-sm">
+          <p className="text-sm font-medium mb-2 text-slate-700">
             Selected Case #'s:
           </p>
-          <div className="flex flex-wrap gap-1 sm:gap-2">
+          <div className="flex flex-wrap gap-2">
             {selectedCategories.map((category) => (
-              <Badge key={category.id} className="bg-blue-100 text-blue-800 border-blue-200 text-xs sm:text-sm">
+              <Badge key={category.id} className="bg-blue-100 text-blue-800 border-blue-200">
                 {category.name} ({category.count})
               </Badge>
             ))}
@@ -575,14 +572,14 @@ const PostPreview = ({
         )}
       </div>
 
-      <ScrollArea className="h-[400px] sm:h-[500px] pr-2 sm:pr-4">
-        <div className="space-y-3 sm:space-y-4">
+      <ScrollArea className="h-[500px] pr-4">
+        <div className="space-y-4">
           {displayPosts.map((post) => (
             <Card
               key={post.id}
-              className="overflow-hidden bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-white/90 hover:shadow-lg transition-all duration-200 rounded-lg sm:rounded-xl"
+              className="overflow-hidden bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-white/90 hover:shadow-lg transition-all duration-200 rounded-xl"
             >
-              <div className="flex items-start p-4 sm:p-6">
+              <div className="flex items-start p-6">
                 <Checkbox
                   id={`post-${post.id}`}
                   checked={selectedPosts.includes(post.id)}
@@ -590,9 +587,9 @@ const PostPreview = ({
                   className="mr-4 mt-1 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
                 <div className="flex-1">
-                  <CardHeader className="p-0 pb-3 sm:pb-4">
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-2 sm:p-3 rounded-lg border border-blue-100 mb-2 sm:mb-3">
-                      <CardTitle className="text-lg sm:text-xl lg:text-2xl text-slate-900 font-bold leading-tight mb-2">
+                  <CardHeader className="p-0 pb-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100 mb-3">
+                      <CardTitle className="text-2xl text-slate-900 font-bold leading-tight mb-2">
                         {post.title}
                       </CardTitle>
                       {(() => {
@@ -605,14 +602,14 @@ const PostPreview = ({
                         ) : null;
                       })()}
                     </div>
-                    <div className="flex items-center text-xs sm:text-sm text-slate-500">
-                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                    <div className="flex items-center text-sm text-slate-500">
+                      <Calendar className="h-4 w-4 mr-1" />
                       <span className="font-medium">{formatDate(post.date)}</span>
                     </div>
                   </CardHeader>
 
-                  <CardContent className="p-0 pb-3 sm:pb-4">
-                    <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
+                  <CardContent className="p-0 pb-4">
+                    <div className="flex flex-col md:flex-row gap-4">
                       {post.featuredImage && (
                         <div className="md:w-1/3">
                           <div className="relative aspect-video rounded-lg overflow-hidden shadow-sm">
