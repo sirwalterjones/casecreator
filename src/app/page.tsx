@@ -118,19 +118,7 @@ export default function Home() {
   >([]);
   const [selectedPosts, setSelectedPosts] = React.useState<number[]>([]);
   const [allPosts, setAllPosts] = React.useState<Post[]>([]);
-  const [pdfSettings, setPdfSettings] = React.useState<any>({
-    // Default settings since we're skipping customize
-    headerText: "Cherokee Multi-Agency Narcotics Squad",
-    coverTitle: "Case File Report",
-    coverSubtitle: "Official Case Documentation",
-    coverDisclaimer: "This document contains sensitive information and is for official use only.",
-    margins: 20,
-    fontSize: 12,
-    lineHeight: 1.5,
-    includeTableOfContents: true,
-    includePageNumbers: true,
-    logoUrl: "/images/cropped-newestcmanslogo.png"
-  });
+  const [pdfSettings, setPdfSettings] = React.useState<any>({});
   const [siteUrl, setSiteUrl] = React.useState<string>("");
 
   // Show password protection if not authenticated
@@ -140,16 +128,18 @@ export default function Home() {
 
   const handleNextStep = () => {
     if (activeTab === "categories") setActiveTab("posts");
-    else if (activeTab === "posts") setActiveTab("generate");
+    else if (activeTab === "posts") setActiveTab("customize");
+    else if (activeTab === "customize") setActiveTab("generate");
   };
 
   const handlePreviousStep = () => {
     if (activeTab === "posts") setActiveTab("categories");
-    else if (activeTab === "generate") setActiveTab("posts");
+    else if (activeTab === "customize") setActiveTab("posts");
+    else if (activeTab === "generate") setActiveTab("customize");
   };
 
   const getStepProgress = () => {
-    const steps = ["categories", "posts", "generate"];
+    const steps = ["categories", "posts", "customize", "generate"];
     return ((steps.indexOf(activeTab) + 1) / steps.length) * 100;
   };
 
@@ -191,7 +181,7 @@ export default function Home() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Modern Tab Navigation */}
           <div className="mb-8 p-2 bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
-            <TabsList className="grid w-full grid-cols-3 bg-transparent p-0 h-auto gap-2">
+            <TabsList className="grid w-full grid-cols-4 bg-transparent p-0 h-auto gap-2">
               <TabsTrigger
                 value="categories"
                 className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0"
@@ -220,8 +210,22 @@ export default function Home() {
               </TabsTrigger>
               
               <TabsTrigger
+                value="customize"
+                disabled={selectedPosts.length === 0}
+                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 data-[state=active]:bg-white/20">
+                  <Settings className="w-6 h-6 text-purple-600 data-[state=active]:text-white" />
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-sm">Customize</div>
+                  <div className="text-xs opacity-70">Format options</div>
+                </div>
+              </TabsTrigger>
+              
+              <TabsTrigger
                 value="generate"
-                disabled={Object.keys(pdfSettings).length === 0}
+                disabled={selectedPosts.length === 0}
                 className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
               >
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 data-[state=active]:bg-white/20">
@@ -242,17 +246,20 @@ export default function Home() {
                 <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
                   {activeTab === "categories" && <Users className="w-6 h-6 text-white" />}
                   {activeTab === "posts" && <FileText className="w-6 h-6 text-white" />}
+                  {activeTab === "customize" && <Settings className="w-6 h-6 text-white" />}
                   {activeTab === "generate" && <Download className="w-6 h-6 text-white" />}
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-bold text-slate-800 mb-1">
                     {activeTab === "categories" && "Source Selection"}
                     {activeTab === "posts" && "Content Review"}
+                    {activeTab === "customize" && "Document Customization"}
                     {activeTab === "generate" && "File Generation"}
                   </CardTitle>
                   <CardDescription className="text-slate-600 text-base">
                     {activeTab === "categories" && "Choose your case data source and select the case number"}
                     {activeTab === "posts" && "Review available reports and select which ones to include"}
+                    {activeTab === "customize" && "Configure your document formatting and layout preferences"}
                     {activeTab === "generate" && "Generate and download your professional case file"}
                   </CardDescription>
                 </div>
@@ -275,6 +282,12 @@ export default function Home() {
                   siteUrl={siteUrl}
                   onSelectionChange={(posts) => setSelectedPosts(posts)}
                   onPostsLoaded={(posts) => setAllPosts(posts)}
+                />
+              </TabsContent>
+
+              <TabsContent value="customize" className="mt-0">
+                <PDFCustomizer
+                  onSettingsChange={(settings) => setPdfSettings(settings)}
                 />
               </TabsContent>
 
@@ -306,7 +319,7 @@ export default function Home() {
             </Button>
 
             <div className="flex items-center gap-2 text-sm text-slate-500">
-              <span>Step {["categories", "posts", "generate"].indexOf(activeTab) + 1} of 3</span>
+              <span>Step {["categories", "posts", "customize", "generate"].indexOf(activeTab) + 1} of 4</span>
             </div>
 
             <Button

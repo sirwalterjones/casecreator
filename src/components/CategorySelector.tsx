@@ -390,7 +390,7 @@ const CategorySelector = ({
             <div className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
               <p className="text-slate-600">
-                Fetching case numbers...
+                Fetching categories from remote site...
               </p>
             </div>
           </div>
