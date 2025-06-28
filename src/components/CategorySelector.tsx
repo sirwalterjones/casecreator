@@ -359,7 +359,7 @@ const CategorySelector = ({
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              {loading ? "Fetching..." : "Fetch Categories"}
+              {loading ? "Fetching..." : "Fetch Cases"}
             </Button>
           </div>
         </div>
@@ -388,7 +388,7 @@ const CategorySelector = ({
             <div className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
               <p className="text-slate-600">
-                Fetching categories from remote site...
+                Fetching Case #'s from remote site...
               </p>
             </div>
           </div>
@@ -398,7 +398,7 @@ const CategorySelector = ({
               <div>
                 <p className="mb-2 text-slate-700 font-medium">No categories loaded</p>
                 <p className="text-sm text-slate-500">
-                  Enter a website URL above and click "Fetch" to load categories
+                  Enter a website URL above and click "Fetch Cases" to load categories
                 </p>
               </div>
             ) : (
