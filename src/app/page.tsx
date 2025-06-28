@@ -225,7 +225,7 @@ export default function Home() {
               
               <TabsTrigger
                 value="generate"
-                disabled={Object.keys(pdfSettings).length === 0}
+                disabled={selectedPosts.length === 0}
                 className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
               >
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 data-[state=active]:bg-white/20">
@@ -327,7 +327,6 @@ export default function Home() {
               disabled={
                 (activeTab === "categories" && selectedCategories.length === 0) ||
                 (activeTab === "posts" && selectedPosts.length === 0) ||
-                (activeTab === "customize" && Object.keys(pdfSettings).length === 0) ||
                 activeTab === "generate"
               }
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"

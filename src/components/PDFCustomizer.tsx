@@ -283,7 +283,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                       onChange={(e) =>
                         handleSettingChange("headerColor", e.target.value)
                       }
-                      className="w-full h-10"
+                      className="w-full h-10 bg-white border-slate-300"
                     />
                   </div>
                 </div>
@@ -302,7 +302,7 @@ const PDFCustomizer: React.FC<PDFCustomizerProps> = ({
                       onChange={(e) =>
                         handleSettingChange("footerColor", e.target.value)
                       }
-                      className="w-full h-10"
+                      className="w-full h-10 bg-white border-slate-300"
                     />
                   </div>
                 </div>
