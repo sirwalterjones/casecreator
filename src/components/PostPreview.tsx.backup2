@@ -102,9 +102,7 @@ const PostPreview = ({
             attachments: [],
           }));
           setFetchedPosts(formattedPosts);
-          const allPostIds = formattedPosts.map((post) => post.id);
-          setSelectedPosts(allPostIds);
-          onSelectionChange(allPostIds); // Auto-select all posts
+          setSelectedPosts(formattedPosts.map((post) => post.id));
           onPostsLoaded(formattedPosts);
           setLoading(false);
           return;
@@ -126,9 +124,7 @@ const PostPreview = ({
       const parsedPosts = parseHtmlForPosts(htmlContent);
 
       setFetchedPosts(parsedPosts);
-      const allPostIds = parsedPosts.map((post) => post.id);
-      setSelectedPosts(allPostIds);
-      onSelectionChange(allPostIds); // Auto-select all posts
+      setSelectedPosts(parsedPosts.map((post) => post.id));
       onPostsLoaded(parsedPosts);
     } catch (err) {
       console.error("Error fetching posts:", err);

@@ -102,9 +102,7 @@ const PostPreview = ({
             attachments: [],
           }));
           setFetchedPosts(formattedPosts);
-          const allPostIds = formattedPosts.map((post) => post.id);
-          setSelectedPosts(allPostIds);
-          onSelectionChange(allPostIds); // Auto-select all posts
+          setSelectedPosts(formattedPosts.map((post) => post.id));
           onPostsLoaded(formattedPosts);
           setLoading(false);
           return;
@@ -126,9 +124,7 @@ const PostPreview = ({
       const parsedPosts = parseHtmlForPosts(htmlContent);
 
       setFetchedPosts(parsedPosts);
-      const allPostIds = parsedPosts.map((post) => post.id);
-      setSelectedPosts(allPostIds);
-      onSelectionChange(allPostIds); // Auto-select all posts
+      setSelectedPosts(parsedPosts.map((post) => post.id));
       onPostsLoaded(parsedPosts);
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -183,9 +179,8 @@ const PostPreview = ({
           const attachments: Attachment[] = [];
           let attachmentId = 1;
 
-          // Look for attachment links in various formats, including Formidable Forms
+          // Look for attachment links in various formats
           const attachmentSelectors = [
-            // File type selectors
             'a[href*=".pdf"]',
             'a[href*=".doc"]', 
             'a[href*=".docx"]',
@@ -194,38 +189,10 @@ const PostPreview = ({
             'a[href*=".jpeg"]',
             'a[href*=".png"]',
             'a[href*=".gif"]',
-            'a[href*=".bmp"]',
-            'a[href*=".tiff"]',
-            'a[href*=".xlsx"]',
-            'a[href*=".xls"]',
-            'a[href*=".ppt"]',
-            'a[href*=".pptx"]',
-            'a[href*=".zip"]',
-            'a[href*=".rar"]',
-            'a[href*=".7z"]',
-            // WordPress upload directories
             'a[href*="/wp-content/uploads/"]',
             'a[href*="/uploads/"]',
             'a[href*="/files/"]',
-            'a[href*="/attachments/"]',
-            // Formidable Forms specific paths
-            'a[href*="/wp-content/uploads/formidable/"]',
-            'a[href*="/formidable/"]',
-            'a[href*="/frm_uploads/"]',
-            'a[href*="/form-uploads/"]',
-            // Other common upload folders
-            'a[href*="/media/"]',
-            'a[href*="/documents/"]',
-            'a[href*="/download/"]',
-            'a[href*="/downloads/"]',
-            'a[href*="/assets/"]',
-            'a[href*="/content/"]',
-            'a[href*="/storage/"]',
-            'a[href*="/public/"]',
-            // Year-based upload folders (common in WordPress)
-            'a[href*="/2024/"]',
-            'a[href*="/2023/"]',
-            'a[href*="/2025/"]'
+            'a[href*="/attachments/"]'
           ];
 
           attachmentSelectors.forEach(selector => {
@@ -256,31 +223,8 @@ const PostPreview = ({
             });
           });
 
-          // Also look for attachment lists or sections, including Formidable Forms
-          const attachmentSections = element.querySelectorAll([
-            '[class*="attachment"]',
-            '[class*="file"]', 
-            '[id*="attachment"]',
-            '[id*="file"]',
-            // Formidable Forms specific selectors
-            '[class*="frm_upload"]',
-            '[class*="frm-upload"]',
-            '[class*="frm_file"]',
-            '[class*="frm-file"]',
-            '[class*="formidable"]',
-            '[class*="frm_form"]',
-            '[class*="frm-form"]',
-            '.frm_file_container',
-            '.frm_upload_field',
-            '.frm_file_field',
-            // Generic form upload selectors
-            '[class*="upload"]',
-            '[class*="document"]',
-            '[class*="media"]',
-            '.file-upload',
-            '.document-upload',
-            '.media-upload'
-          ].join(', '));
+          // Also look for attachment lists or sections
+          const attachmentSections = element.querySelectorAll('[class*="attachment"], [class*="file"], [id*="attachment"], [id*="file"]');
           attachmentSections.forEach(section => {
             const links = section.querySelectorAll('a[href]');
             links.forEach(link => {
@@ -307,51 +251,6 @@ const PostPreview = ({
                 }
               }
             });
-          });
-
-          // Additional search for file references in text content (Formidable Forms often embeds file info)
-          const textContent = element.textContent || '';
-          const filePatterns = [
-            // Look for file URLs in text
-            /https?:\/\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi,
-            // Look for wp-content/uploads paths
-            /\/wp-content\/uploads\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi,
-            // Look for formidable specific paths
-            /\/formidable\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi,
-            // Look for any upload folder paths
-            /\/(?:uploads?|files?|documents?|media|attachments?)\/[^\s]+\.(pdf|doc|docx|txt|jpg|jpeg|png|gif|bmp|tiff|xlsx|xls|ppt|pptx|zip|rar|7z)/gi
-          ];
-
-          filePatterns.forEach(pattern => {
-            const matches = textContent.match(pattern);
-            if (matches) {
-              matches.forEach(match => {
-                // Extract filename from path
-                const urlParts = match.split('/');
-                const filename = urlParts[urlParts.length - 1];
-                
-                if (filename && filename.includes('.')) {
-                  // Determine file type
-                  let type = 'file';
-                  if (match.includes('.pdf')) type = 'pdf';
-                  else if (match.includes('.doc')) type = 'doc';
-                  else if (match.includes('.txt')) type = 'txt';
-                  else if (match.match(/\.(jpg|jpeg|png|gif|bmp|tiff)$/i)) type = 'image';
-                  else if (match.match(/\.(xlsx?|ppt|pptx)$/i)) type = 'doc';
-
-                  // Avoid duplicates
-                  const isDuplicate = attachments.some(att => att.url === match);
-                  if (!isDuplicate) {
-                    attachments.push({
-                      id: attachmentId++,
-                      title: filename,
-                      url: match,
-                      type: type
-                    });
-                  }
-                }
-              });
-            }
           });
 
           if (title.length > 5 && title.length < 200) {

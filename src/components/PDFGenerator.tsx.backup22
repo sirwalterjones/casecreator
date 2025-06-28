@@ -1,0 +1,1025 @@
+"use client";
+
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Download, AlertCircle, FileText, Shield } from "lucide-react";
+import jsPDF from "jspdf";
+
+interface Attachment {
+  id: number;
+  title: string;
+  url: string;
+  type: string;
+}
+
+interface PDFSettings {
+  paperSize: string;
+  orientation: string;
+  margins: number;
+  headerColor: string;
+  footerColor: string;
+  includeCoverPage: boolean;
+  coverImage: File | null;
+  coverTitle: string;
+  coverSubtitle: string;
+  coverDisclaimer: string;
+  font: string;
+  fontSize: number;
+  headerText: string;
+  footerText: string;
+}
+
+interface PDFGeneratorProps {
+  selectedPosts?: Array<{
+    id: number;
+    title: string;
+    content: string;
+    featuredImage?: string;
+    attachments?: Attachment[];
+    date?: string;
+    excerpt?: string;
+  }>;
+  templateSettings?: PDFSettings;
+  categoryName?: string;
+  siteUrl?: string;
+  onGenerationComplete?: (pdfUrl: string) => void;
+}
+
+const PDFGenerator: React.FC<PDFGeneratorProps> = ({
+  selectedPosts = [],
+  templateSettings = {
+    paperSize: "a4",
+    orientation: "portrait",
+    margins: 20,
+    headerColor: "#000000",
+    footerColor: "#000000",
+    includeCoverPage: true,
+    coverImage: null,
+    coverTitle: "CHEROKEE MULTI-AGENCY NARCOTICS SQUAD",
+    coverSubtitle: "OFFICIAL CASE FILE",
+    coverDisclaimer: "This document contains confidential information. Distribution is restricted to authorized personnel only.",
+    font: "Times New Roman",
+    fontSize: 12,
+    headerText: "CHEROKEE MULTI-AGENCY NARCOTICS SQUAD",
+    footerText: "DO NOT RELEASE WITHOUT COMMANDER APPROVAL",
+  },
+  categoryName = "",
+  siteUrl = "",
+  onGenerationComplete = () => {},
+}) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState("");
+
+  // Helper function to convert hex color to RGB for jsPDF
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : { r: 0, g: 0, b: 0 };
+  };
+
+  // Check if text is a field label that should be bolded
+  const isFieldLabel = (text: string): boolean => {
+    const trimmedText = text.trim();
+    return (
+      trimmedText === 'Date of Report' ||
+      trimmedText === 'Time of Report' ||
+      trimmedText === 'Incident Location' ||
+      trimmedText === 'Report Title' ||
+      trimmedText === 'Narrative' ||
+      trimmedText === 'Attachments' ||
+      trimmedText === 'ATTACHMENTS' ||
+      trimmedText === 'Submitting Agent' ||
+      trimmedText === 'Approving Supervisor' ||
+      trimmedText === 'Approving Commander' ||
+      trimmedText.endsWith(':')
+    );
+  };
+
+  // Enhanced HTML content parser
+  const parseHtmlContent = (html: string) => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    
+    const content: Array<{
+      type: 'paragraph' | 'heading' | 'list' | 'label';
+      text: string;
+      level?: number;
+      style?: 'bold' | 'italic' | 'normal';
+      centered?: boolean;
+    }> = [];
+
+    // First, try to split by line breaks to catch standalone field labels
+    const lines = html.split(/\n|<br\s*\/?>/i).map(line => line.trim()).filter(line => line);
+    
+    for (const line of lines) {
+      // Remove HTML tags but preserve special characters and numbers
+      const cleanText = line.replace(/<[^>]*>/g, '').trim();
+      
+      // Decode HTML entities to handle special characters properly
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = cleanText;
+      const decodedText = tempDiv.textContent || tempDiv.innerText || cleanText;
+      
+      // Filter out date-like patterns that appear to be case numbers or IDs
+      const isDateLikePattern = /^\d{2}-\d{4}-\d{2}-\d{2}$/.test(decodedText.trim());
+      
+      // Filter out horizontal lines and separators
+      const isHorizontalLine = /^[-_=]{3,}$/.test(decodedText.trim()) || 
+                               decodedText.trim() === '' ||
+                               /^[\s\-_=]*$/.test(decodedText);
+      
+      if (decodedText && !isDateLikePattern && !isHorizontalLine) {
+        if (isFieldLabel(decodedText)) {
+          content.push({
+            type: 'label',
+            text: decodedText,
+            style: 'bold'
+          });
+        } else {
+          // Check if it's a heading
+          if (line.match(/<h[1-6][^>]*>/i)) {
+            const level = parseInt(line.match(/<h([1-6])[^>]*>/i)?.[1] || '1');
+            content.push({
+              type: 'heading',
+              text: decodedText,
+              level,
+              centered: level <= 3,
+              style: 'bold'
+            });
+          } else {
+            content.push({
+              type: 'paragraph',
+              text: decodedText,
+              style: 'normal'
+            });
+          }
+        }
+      }
+    }
+
+    // If no content found from line parsing, fall back to DOM parsing
+    if (content.length === 0) {
+      const walkNodes = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent?.trim();
+          if (text) {
+            content.push({
+              type: isFieldLabel(text) ? 'label' : 'paragraph',
+              text,
+              style: isFieldLabel(text) ? 'bold' : 'normal'
+            });
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as Element;
+          const tagName = element.tagName.toLowerCase();
+          const text = element.textContent?.trim() || '';
+
+          switch (tagName) {
+            case 'h1':
+            case 'h2':
+            case 'h3':
+              const level = parseInt(tagName.charAt(1));
+              content.push({
+                type: 'heading',
+                text,
+                level,
+                centered: true,
+                style: 'bold'
+              });
+              break;
+              
+            case 'h4':
+            case 'h5':
+            case 'h6':
+              content.push({
+                type: 'heading',
+                text,
+                level: parseInt(tagName.charAt(1)),
+                style: 'bold'
+              });
+              break;
+              
+            case 'p':
+              if (text) {
+                content.push({
+                  type: isFieldLabel(text) ? 'label' : 'paragraph',
+                  text,
+                  style: isFieldLabel(text) ? 'bold' : 'normal'
+                });
+              }
+              break;
+              
+            case 'ul':
+            case 'ol':
+              const listItems = element.querySelectorAll('li');
+              listItems.forEach(li => {
+                const liText = li.textContent?.trim();
+                if (liText) {
+                  content.push({
+                    type: 'list',
+                    text: liText
+                  });
+                }
+              });
+              break;
+              
+            case 'hr':
+              // Skip horizontal rule elements completely
+              break;
+              
+            default:
+              // For other elements, process child nodes
+              Array.from(element.childNodes).forEach(walkNodes);
+          }
+        }
+      };
+
+      Array.from(div.childNodes).forEach(walkNodes);
+    }
+    
+    return content;
+  };
+
+  // Function to parse HTML attachments and extract clean filename and URL
+  const parseAttachment = (attachment: Attachment): { filename: string; url: string } => {
+    let filename = attachment.title;
+    let url = attachment.url;
+    
+    // Check if title contains HTML (like <a href="url">filename</a>)
+    if (attachment.title && attachment.title.includes('<a')) {
+      try {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = attachment.title;
+        const linkElement = tempDiv.querySelector('a');
+        
+        if (linkElement) {
+          filename = linkElement.textContent?.trim() || 'Attachment';
+          const href = linkElement.getAttribute('href');
+          if (href) {
+            url = href;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse HTML attachment:', e);
+      }
+    }
+    
+    // Clean up the filename
+    if (filename) {
+      // Remove parenthetical content like "(path/to/file)"
+      filename = filename.replace(/\s*\([^)]*\)/g, '');
+      
+      // If still has path separators, extract just the filename
+      if (filename.includes('/')) {
+        const parts = filename.split('/');
+        filename = parts[parts.length - 1] || filename;
+      }
+    }
+    
+    // If we still don't have a clean filename, try extracting from URL
+    if (!filename || filename.includes('/')) {
+      const urlParts = url.split('/');
+      const urlFilename = urlParts[urlParts.length - 1];
+      if (urlFilename && urlFilename.includes('.')) {
+        filename = urlFilename;
+      }
+    }
+    
+    return {
+      filename: (filename || 'Attachment').trim().replace(/[\\\/]/g, ''),
+      url: url
+    };
+  };
+
+  // Extract clean filename from attachment (for backward compatibility)
+  const getCleanFilename = (attachment: Attachment): string => {
+    return parseAttachment(attachment).filename;
+  };
+
+  // Format date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+    
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long", 
+      day: "numeric"
+    });
+  };
+
+  // Convert image to base64
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Default badge functionality removed to avoid PNG corruption issues
+
+  // Main PDF generation function
+  const generateProfessionalPDF = async () => {
+    if (selectedPosts.length === 0) {
+      setError("No posts selected for PDF generation");
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      setError(null);
+      setProgress(0);
+      setCurrentStep("Initializing PDF generation...");
+
+      const pdf = new jsPDF({
+        orientation: templateSettings.orientation as 'portrait' | 'landscape',
+        unit: 'mm',
+        format: templateSettings.paperSize === 'letter' ? [216, 279] : 'a4'
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margins = templateSettings.margins;
+      const contentWidth = pageWidth - (margins * 2);
+      
+      const headerColor = hexToRgb(templateSettings.headerColor);
+      const footerColor = hexToRgb(templateSettings.footerColor);
+
+      setProgress(10);
+      setCurrentStep("Creating cover page...");
+
+      // Cover Page
+      if (templateSettings.includeCoverPage) {
+        // Header banner
+        pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+        pdf.rect(0, 0, pageWidth, 40, "F");
+        
+        // Cover image (only if provided by user)
+        if (templateSettings.coverImage) {
+          try {
+            const base64Image = await convertImageToBase64(templateSettings.coverImage);
+            pdf.addImage(base64Image, 'JPEG', pageWidth/2 - 25, 50, 50, 50);
+          } catch (e) {
+            console.warn('Failed to add cover image:', e);
+            // Skip image if it fails to load
+          }
+        }
+
+        // Title
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFont("times", "bold");
+        pdf.setFontSize(24);
+        const titleLines = pdf.splitTextToSize(templateSettings.coverTitle, contentWidth);
+        let yPos = 120;
+        titleLines.forEach((line: string) => {
+          const lineWidth = pdf.getTextWidth(line);
+          pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
+          yPos += 12;
+        });
+
+        // Subtitle
+        pdf.setFontSize(16);
+        yPos += 10;
+        const subtitleLines = pdf.splitTextToSize(templateSettings.coverSubtitle, contentWidth);
+        subtitleLines.forEach((line: string) => {
+          const lineWidth = pdf.getTextWidth(line);
+          pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
+          yPos += 8;
+        });
+
+        // Case info - centered
+        yPos += 20;
+        pdf.setFont("times", "normal");
+        pdf.setFontSize(12);
+        
+        const generatedText = `Generated: ${formatDate()}`;
+        const caseText = `Case #: ${categoryName || 'General'}`;
+        const reportsText = `Total Reports: ${selectedPosts.length}`;
+        
+        // Center each line
+        const generatedWidth = pdf.getTextWidth(generatedText);
+        const caseWidth = pdf.getTextWidth(caseText);
+        const reportsWidth = pdf.getTextWidth(reportsText);
+        
+        pdf.text(generatedText, (pageWidth - generatedWidth) / 2, yPos);
+        pdf.text(caseText, (pageWidth - caseWidth) / 2, yPos + 8);
+        pdf.text(reportsText, (pageWidth - reportsWidth) / 2, yPos + 16);
+
+        // Disclaimer - centered
+        yPos = pageHeight - 60;
+        pdf.setFontSize(10);
+        const disclaimerLines = pdf.splitTextToSize(templateSettings.coverDisclaimer, contentWidth);
+        disclaimerLines.forEach((line: string) => {
+          const lineWidth = pdf.getTextWidth(line);
+          pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
+          yPos += 5;
+        });
+
+        pdf.addPage();
+      }
+
+      setProgress(20);
+      setCurrentStep("Processing case file content...");
+
+      // Process each post
+      let currentPostIndex = 0;
+      for (const post of selectedPosts) {
+        setCurrentStep(`Processing report ${currentPostIndex + 1} of ${selectedPosts.length}...`);
+        
+        // Add header to page
+        pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+        pdf.rect(0, 0, pageWidth, 25, "F");
+        pdf.setFont("times", "bold");
+        pdf.setFontSize(10);
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(templateSettings.headerText, margins, 15);
+        
+        // Add case number to top right
+        const caseText = `Case #: ${categoryName || 'General'}`;
+        const caseTextWidth = pdf.getTextWidth(caseText);
+        pdf.text(caseText, pageWidth - margins - caseTextWidth, 15);
+        
+        let yPos = 40;
+
+        // Post title
+        pdf.setFont("times", "bold");
+        pdf.setFontSize(18);
+        pdf.setTextColor(0, 0, 0);
+        const titleLines = pdf.splitTextToSize(post.title, contentWidth);
+        titleLines.forEach((line: string) => {
+          pdf.text(line, margins, yPos);
+          yPos += 10;
+        });
+
+        yPos += 10;
+
+        // Separator line
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(margins, yPos, pageWidth - margins, yPos);
+        yPos += 15;
+
+        // Parse and render content
+        const parsedContent = parseHtmlContent(post.content);
+        const lineHeight = templateSettings.fontSize * 0.6;
+
+        for (let i = 0; i < parsedContent.length; i++) {
+          const item = parsedContent[i];
+          
+          // Estimate height needed for this content item
+          let estimatedHeight = 0;
+          switch (item.type) {
+            case 'heading':
+              estimatedHeight = 25;
+              break;
+            case 'label':
+              estimatedHeight = 20;
+              break;
+            case 'paragraph':
+              // Estimate based on text length and wrapping
+              const paragraphLines = pdf.splitTextToSize(item.text, contentWidth);
+              estimatedHeight = paragraphLines.length * lineHeight + 5;
+              break;
+            case 'list':
+              const listLines = pdf.splitTextToSize(item.text, contentWidth - 10);
+              estimatedHeight = listLines.length * lineHeight + 5;
+              break;
+            default:
+              estimatedHeight = 15;
+          }
+          
+          // Check if we need a new page BEFORE rendering this item
+          if (yPos + estimatedHeight > pageHeight - 40) {
+            // Add footer
+            pdf.setFillColor(footerColor.r, footerColor.g, footerColor.b);
+            pdf.rect(0, pageHeight - 15, pageWidth, 15, "F");
+            pdf.setFont("times", "normal");
+            pdf.setFontSize(8);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(templateSettings.footerText, margins, pageHeight - 5);
+            
+            pdf.addPage();
+            
+            // Add header to new page
+            pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+            pdf.rect(0, 0, pageWidth, 25, "F");
+            pdf.setFont("times", "bold");
+            pdf.setFontSize(10);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(templateSettings.headerText, margins, 15);
+            
+            // Add case number to top right
+            const caseText = `Case #: ${categoryName || 'General'}`;
+            const caseTextWidth = pdf.getTextWidth(caseText);
+            pdf.text(caseText, pageWidth - margins - caseTextWidth, 15);
+            
+            yPos = 40;
+          }
+
+          switch (item.type) {
+            case 'heading':
+              const headingSize = templateSettings.fontSize + (4 - (item.level || 1));
+              pdf.setFont("times", "bold");
+              pdf.setFontSize(headingSize);
+              pdf.setTextColor(0, 0, 0);
+              
+              const headingLines = pdf.splitTextToSize(item.text, contentWidth);
+              headingLines.forEach((line: string) => {
+                if (item.centered) {
+                  const lineWidth = pdf.getTextWidth(line);
+                  const xPos = margins + (contentWidth - lineWidth) / 2;
+                  pdf.text(line, xPos, yPos);
+                } else {
+                  pdf.text(line, margins, yPos);
+                }
+                yPos += headingSize * 0.6;
+              });
+              yPos += 5;
+              break;
+
+            case 'label':
+              pdf.setFont("times", "bold");
+              pdf.setFontSize(templateSettings.fontSize);
+              pdf.setTextColor(0, 0, 0);
+              
+              const labelLines = pdf.splitTextToSize(item.text, contentWidth);
+              labelLines.forEach((line: string) => {
+                pdf.text(line, margins, yPos);
+                yPos += lineHeight;
+              });
+              yPos += 3;
+              break;
+
+            case 'paragraph':
+              pdf.setFont("times", "normal");
+              pdf.setFontSize(templateSettings.fontSize);
+              pdf.setTextColor(0, 0, 0);
+              
+              const paragraphLines = pdf.splitTextToSize(item.text, contentWidth);
+              paragraphLines.forEach((line: string) => {
+                pdf.text(line, margins, yPos);
+                yPos += lineHeight;
+              });
+              yPos += 3;
+              break;
+
+            case 'list':
+              pdf.setFont("times", "normal");
+              pdf.setFontSize(templateSettings.fontSize);
+              pdf.setTextColor(0, 0, 0);
+              
+              const listLines = pdf.splitTextToSize(item.text, contentWidth - 10);
+              pdf.text("•", margins, yPos);
+              listLines.forEach((line: string) => {
+                pdf.text(line, margins + 8, yPos);
+                yPos += lineHeight;
+              });
+              yPos += 2;
+              break;
+          }
+        }
+
+        // Attachments section
+        if (post.attachments && post.attachments.length > 0) {
+          yPos += 15;
+          
+          // Simple page check - only if we're really at the bottom
+          if (yPos > pageHeight - 40) {
+            pdf.setFillColor(footerColor.r, footerColor.g, footerColor.b);
+            pdf.rect(0, pageHeight - 15, pageWidth, 15, "F");
+            pdf.setFont("times", "normal");
+            pdf.setFontSize(8);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(templateSettings.footerText, margins, pageHeight - 5);
+            
+            pdf.addPage();
+            
+            // Add header to new page
+            pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+            pdf.rect(0, 0, pageWidth, 25, "F");
+            pdf.setFont("times", "bold");
+            pdf.setFontSize(10);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(templateSettings.headerText, margins, 15);
+            
+            // Add case number to top right
+            const caseText = `Case #: ${categoryName || 'General'}`;
+            const caseTextWidth = pdf.getTextWidth(caseText);
+            pdf.text(caseText, pageWidth - margins - caseTextWidth, 15);
+            
+            yPos = 40;
+          }
+          
+          // Attachments heading
+          pdf.setFont("times", "bold");
+          pdf.setFontSize(templateSettings.fontSize);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text("Attachments", margins, yPos);
+          yPos += 10;
+          
+          // Calculate dynamic attachment box height based on content
+          let estimatedBoxHeight = 20; // Base height
+          post.attachments.forEach(attachment => {
+            const { url } = parseAttachment(attachment);
+            let fullUrl = url;
+            if (!fullUrl.startsWith('http')) {
+              if (siteUrl && siteUrl.trim()) {
+                const cleanSiteUrl = siteUrl.replace(/\/+$/, '');
+                const cleanAttachmentUrl = url.startsWith('/') ? url : `/${url}`;
+                fullUrl = `${cleanSiteUrl}${cleanAttachmentUrl}`;
+              } else {
+                fullUrl = url.startsWith('/') ? `https://cmansrms.us${url}` : `https://cmansrms.us/${url}`;
+              }
+            }
+            // Estimate lines needed for URL
+            const urlLines = Math.ceil(fullUrl.length / 80); // Rough estimate
+            estimatedBoxHeight += 12 + (urlLines * 10) + 5; // filename + URL lines + spacing
+          });
+          
+          pdf.setFillColor(250, 250, 250);
+          pdf.rect(margins, yPos, contentWidth, estimatedBoxHeight, "F");
+          pdf.setDrawColor(150, 150, 150);
+          pdf.rect(margins, yPos, contentWidth, estimatedBoxHeight, "S");
+          
+          yPos += 6;
+          
+          post.attachments.forEach((attachment, index) => {
+            const { filename, url } = parseAttachment(attachment);
+            
+            // Create clickable link with better URL construction
+            let fullUrl = url;
+            
+            // Ensure we have a complete URL
+            if (!fullUrl.startsWith('http')) {
+              if (siteUrl && siteUrl.trim()) {
+                const cleanSiteUrl = siteUrl.replace(/\/+$/, '');
+                const cleanAttachmentUrl = url.startsWith('/') ? url : `/${url}`;
+                fullUrl = `${cleanSiteUrl}${cleanAttachmentUrl}`;
+              } else {
+                // Default to cmansrms.us if no siteUrl provided
+                fullUrl = url.startsWith('/') ? `https://cmansrms.us${url}` : `https://cmansrms.us/${url}`;
+              }
+            }
+            
+                        // Display filename in bold black
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFont("times", "bold");
+            pdf.setFontSize(10);
+            
+            const attachmentText = `${index + 1}. ${filename}`;
+            pdf.text(attachmentText, margins + 5, yPos);
+            yPos += 12;
+            
+            // Display URL in a simple, copyable format
+            pdf.setTextColor(0, 0, 255);
+            pdf.setFont("times", "normal");
+            pdf.setFontSize(9);
+            
+            // Add "URL:" prefix
+            pdf.setTextColor(0, 0, 0);
+            pdf.text("URL:", margins + 10, yPos);
+            
+            // Display URL in blue, making it easy to read and copy
+            pdf.setTextColor(0, 0, 255);
+            const linkStartX = margins + 30;
+            
+            // Split long URLs if needed
+            const urlLines = pdf.splitTextToSize(fullUrl, contentWidth - 40);
+            urlLines.forEach((urlLine: string, lineIndex: number) => {
+              const currentY = yPos + (lineIndex * 10);
+              pdf.text(urlLine, linkStartX, currentY);
+              
+              // Add visual underline to indicate it's a link
+              pdf.setDrawColor(0, 0, 255);
+              pdf.setLineWidth(0.3);
+              pdf.line(linkStartX, currentY + 1, linkStartX + pdf.getTextWidth(urlLine), currentY + 1);
+            });
+            
+            yPos += (urlLines.length * 10) + 8;
+            
+            // Reset font styling
+            pdf.setFont("times", "normal");
+            pdf.setTextColor(0, 0, 0);
+          });
+        }
+
+        currentPostIndex++;
+        setProgress(40 + (currentPostIndex / selectedPosts.length) * 50);
+        
+        // ALWAYS add a page break after each complete post (except the last one)
+        if (currentPostIndex < selectedPosts.length) {
+          // Add footer before new page
+          pdf.setFillColor(footerColor.r, footerColor.g, footerColor.b);
+          pdf.rect(0, pageHeight - 15, pageWidth, 15, "F");
+          pdf.setFont("times", "normal");
+          pdf.setFontSize(8);
+          pdf.setTextColor(255, 255, 255);
+          pdf.text(templateSettings.footerText, margins, pageHeight - 5);
+          
+          // Force new page for next post
+          pdf.addPage();
+          
+          // Add header to new page
+          pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+          pdf.rect(0, 0, pageWidth, 25, "F");
+          pdf.setFont("times", "bold");
+          pdf.setFontSize(10);
+          pdf.setTextColor(255, 255, 255);
+          pdf.text(templateSettings.headerText, margins, 15);
+          
+          // Add case number to top right
+          const caseText = `Case #: ${categoryName || 'General'}`;
+          const caseTextWidth = pdf.getTextWidth(caseText);
+          pdf.text(caseText, pageWidth - margins - caseTextWidth, 15);
+          
+          yPos = 40; // Reset Y position for new page
+        }
+      }
+
+      setCurrentStep("Creating links reference page...");
+
+      // Collect all URLs from all posts for a reference page
+      const allUrls: Array<{ filename: string; url: string; postTitle: string }> = [];
+      selectedPosts.forEach((post, postIndex) => {
+        if (post.attachments && post.attachments.length > 0) {
+          post.attachments.forEach((attachment) => {
+            const { filename, url } = parseAttachment(attachment);
+            let fullUrl = url;
+            
+            // Ensure we have a complete URL
+            if (!fullUrl.startsWith('http')) {
+              if (siteUrl && siteUrl.trim()) {
+                const cleanSiteUrl = siteUrl.replace(/\/+$/, '');
+                const cleanAttachmentUrl = url.startsWith('/') ? url : `/${url}`;
+                fullUrl = `${cleanSiteUrl}${cleanAttachmentUrl}`;
+              } else {
+                fullUrl = url.startsWith('/') ? `https://cmansrms.us${url}` : `https://cmansrms.us/${url}`;
+              }
+            }
+            
+            allUrls.push({
+              filename,
+              url: fullUrl,
+              postTitle: post.title
+            });
+          });
+        }
+      });
+
+      // Add Links Reference page if there are any URLs
+      if (allUrls.length > 0) {
+        // Add footer to current page first
+        pdf.setFillColor(footerColor.r, footerColor.g, footerColor.b);
+        pdf.rect(0, pageHeight - 15, pageWidth, 15, "F");
+        pdf.setFont("times", "normal");
+        pdf.setFontSize(8);
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(templateSettings.footerText, margins, pageHeight - 5);
+        
+        // Add new page for links reference
+        pdf.addPage();
+        
+        // Add header to links reference page
+        pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+        pdf.rect(0, 0, pageWidth, 25, "F");
+        pdf.setFont("times", "bold");
+        pdf.setFontSize(10);
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(templateSettings.headerText, margins, 15);
+        
+        // Add case number to top right
+        const caseText = `Case #: ${categoryName || 'General'}`;
+        const caseTextWidth = pdf.getTextWidth(caseText);
+        pdf.text(caseText, pageWidth - margins - caseTextWidth, 15);
+        
+        let linksYPos = 50;
+        
+        // Links Reference page title
+        pdf.setFont("times", "bold");
+        pdf.setFontSize(16);
+        pdf.setTextColor(0, 0, 0);
+        const linksTitleText = "LINKS REFERENCE";
+        const linksTitleWidth = pdf.getTextWidth(linksTitleText);
+        pdf.text(linksTitleText, (pageWidth - linksTitleWidth) / 2, linksYPos);
+        linksYPos += 25;
+        
+        pdf.setFont("times", "normal");
+        pdf.setFontSize(10);
+        pdf.text("All attachment URLs from this case file:", margins, linksYPos);
+        linksYPos += 20;
+        
+        // List all URLs
+        allUrls.forEach((item, index) => {
+          // Check if we need a new page
+          if (linksYPos > pageHeight - 80) {
+            pdf.setFillColor(footerColor.r, footerColor.g, footerColor.b);
+            pdf.rect(0, pageHeight - 15, pageWidth, 15, "F");
+            pdf.setFont("times", "normal");
+            pdf.setFontSize(8);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(templateSettings.footerText, margins, pageHeight - 5);
+            
+            pdf.addPage();
+            
+            // Add header to new page
+            pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+            pdf.rect(0, 0, pageWidth, 25, "F");
+            pdf.setFont("times", "bold");
+            pdf.setFontSize(10);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(templateSettings.headerText, margins, 15);
+            
+            // Add case number to top right
+            const caseText = `Case #: ${categoryName || 'General'}`;
+            const caseTextWidth = pdf.getTextWidth(caseText);
+            pdf.text(caseText, pageWidth - margins - caseTextWidth, 15);
+            
+            linksYPos = 40;
+          }
+          
+          // Link number and filename
+          pdf.setFont("times", "bold");
+          pdf.setFontSize(10);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(`${index + 1}. ${item.filename}`, margins, linksYPos);
+          linksYPos += 12;
+          
+          // Post title
+          pdf.setFont("times", "italic");
+          pdf.setFontSize(9);
+          pdf.setTextColor(100, 100, 100);
+          pdf.text(`From: ${item.postTitle}`, margins + 10, linksYPos);
+          linksYPos += 12;
+          
+          // URL in blue with selection-friendly format
+          pdf.setFont("times", "normal");
+          pdf.setFontSize(8);
+          pdf.setTextColor(0, 0, 255);
+          
+          // Break URL into selectable chunks
+          const urlLines = pdf.splitTextToSize(item.url, contentWidth - 20);
+          urlLines.forEach((urlLine: string) => {
+            pdf.text(urlLine, margins + 10, linksYPos);
+            linksYPos += 10;
+          });
+          
+          linksYPos += 8; // Space between entries
+        });
+      }
+
+      setCurrentStep("Finalizing document...");
+
+      // Update all page headers and footers with correct page numbers
+      const totalPages = pdf.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        
+        if (i > 1 || !templateSettings.includeCoverPage) {
+          // Update header
+          pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
+          pdf.rect(0, 0, pageWidth, 25, "F");
+          pdf.setFont("times", "bold");
+          pdf.setFontSize(10);
+          pdf.setTextColor(255, 255, 255);
+          pdf.text(templateSettings.headerText, margins, 15);
+          
+          // Add case number to top right
+          const caseText = `Case #: ${categoryName || 'General'}`;
+          const caseTextWidth = pdf.getTextWidth(caseText);
+          pdf.text(caseText, pageWidth - margins - caseTextWidth, 15);
+          
+          // Update footer with page numbers
+          pdf.setFillColor(footerColor.r, footerColor.g, footerColor.b);
+          pdf.rect(0, pageHeight - 15, pageWidth, 15, "F");
+          
+          pdf.setFont("times", "normal");
+          pdf.setFontSize(8);
+          pdf.setTextColor(255, 255, 255);
+          
+          // Left-aligned footer text
+          pdf.text(templateSettings.footerText, margins, pageHeight - 5);
+          
+          // Right-aligned page numbers
+          const pageText = `Page ${i} of ${totalPages}`;
+          const pageTextWidth = pdf.getTextWidth(pageText);
+          pdf.text(pageText, pageWidth - margins - pageTextWidth, pageHeight - 5);
+        }
+      }
+
+      setProgress(95);
+      setCurrentStep("Generating PDF file...");
+
+      // Generate and download PDF
+      const pdfBlob = pdf.output("blob");
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      
+      const filename = `${categoryName || 'General'}.pdf`;
+      
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      onGenerationComplete(pdfUrl);
+      setProgress(100);
+      setCurrentStep("PDF generation completed successfully!");
+      
+      setTimeout(() => {
+        setIsGenerating(false);
+        setCurrentStep("");
+        setProgress(0);
+      }, 2000);
+
+    } catch (err) {
+      console.error("PDF generation error:", err);
+      setError(err instanceof Error ? err.message : "An error occurred during PDF generation");
+      setIsGenerating(false);
+      setCurrentStep("");
+      setProgress(0);
+    }
+  };
+
+  return (
+    <Card className="w-full bg-white border-slate-200 shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200/50">
+        <CardTitle className="flex items-center gap-2 text-slate-800">
+          <Shield className="h-5 w-5 text-blue-600" />
+          Professional Case File Generator
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4 bg-white">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-slate-700">
+            <span>Selected Reports: {selectedPosts.length}</span>
+            <span>Template: {templateSettings.coverTitle}</span>
+          </div>
+          
+          {selectedPosts.length > 0 && (
+            <div className="text-xs text-slate-600">
+              Reports: {selectedPosts.map(p => p.title.substring(0, 30)).join(", ")}...
+            </div>
+          )}
+        </div>
+
+        {isGenerating && (
+          <div className="space-y-3">
+            <Progress value={progress} className="w-full" />
+            <div className="text-sm text-slate-600">
+              {currentStep}
+            </div>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="bg-white border-t border-slate-200/50">
+        <Button
+          onClick={generateProfessionalPDF}
+          disabled={selectedPosts.length === 0 || isGenerating}
+          className="w-full flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+        >
+          {isGenerating ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              Generating Professional Case File...
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4" />
+              Generate Professional Case File PDF
+            </>
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+export default PDFGenerator; 

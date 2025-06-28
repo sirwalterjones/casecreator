@@ -14,7 +14,9 @@ import PostPreview from "@/components/PostPreview";
 import PDFCustomizer from "@/components/PDFCustomizer";
 import PDFGenerator from "@/components/PDFGenerator";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronLeft, FileText, Users, Settings, Download } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ChevronRight, ChevronLeft, FileText, Users, Settings, Download, Lock, Shield } from "lucide-react";
 
 interface Category {
   id: number;
@@ -38,7 +40,78 @@ interface Post {
   }>;
 }
 
+// Password protection component
+const PasswordProtection = ({ onAuthenticated }: { onAuthenticated: () => void }) => {
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === "cmans600") {
+      onAuthenticated();
+    } else {
+      setError("Invalid password. Please try again.");
+      setPassword("");
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fill-rule=%22evenodd%22%3E%3Cg%20fill=%22%23f1f5f9%22%20fill-opacity=%220.4%22%3E%3Ccircle%20cx=%227%22%20cy=%227%22%20r=%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+      
+      <div className="relative z-10 w-full max-w-md">
+        <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border-b border-slate-200/50 p-8 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl mb-6 shadow-xl mx-auto">
+              <Shield className="w-10 h-10 text-white" />
+            </div>
+            
+            <CardTitle className="text-2xl font-bold text-slate-800 mb-2">
+              Secure Access Required
+            </CardTitle>
+            <CardDescription className="text-slate-600 text-base">
+              Cherokee Multi-Agency Narcotics Squad<br />
+              Case File Generator
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  Access Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
+                />
+                {error && (
+                  <p className="text-sm text-red-600 mt-2">{error}</p>
+                )}
+              </div>
+              
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105"
+              >
+                Access System
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  );
+};
+
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState("categories");
   const [selectedCategories, setSelectedCategories] = React.useState<
     Category[]
@@ -47,6 +120,11 @@ export default function Home() {
   const [allPosts, setAllPosts] = React.useState<Post[]>([]);
   const [pdfSettings, setPdfSettings] = React.useState<any>({});
   const [siteUrl, setSiteUrl] = React.useState<string>("");
+
+  // Show password protection if not authenticated
+  if (!isAuthenticated) {
+    return <PasswordProtection onAuthenticated={() => setIsAuthenticated(true)} />;
+  }
 
   const handleNextStep = () => {
     if (activeTab === "categories") setActiveTab("posts");
