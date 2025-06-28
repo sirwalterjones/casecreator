@@ -336,14 +336,14 @@ const CategorySelector = ({
               Case Source URL
             </Label>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1">
               <Input
                 id="remote-url"
                 placeholder="https://cmansrms.us or https://intelligence-source.com"
                 value={remoteUrl}
                 onChange={(e) => handleUrlChange(e.target.value)}
-                className={`bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20 ${!isValidUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400/20" : ""}`}
+                className={`h-12 text-base bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20 ${!isValidUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400/20" : ""}`}
               />
               {!isValidUrl && (
                 <p className="text-sm text-red-600 mt-1">
@@ -354,26 +354,24 @@ const CategorySelector = ({
             <Button
               onClick={handleFetchCategories}
               disabled={!isValidUrl || loading}
-              size="sm"
-              className="shrink-0 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+              className="h-12 w-full sm:w-auto px-6 shrink-0 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
             >
               {loading ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : (
-                "Fetch"
-              )}
+                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              {loading ? "Fetching..." : "Fetch Categories"}
             </Button>
           </div>
         </div>
 
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-3.5 h-5 w-5 text-slate-500" />
           <Input
             placeholder="Search case numbers..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
+            className="h-12 pl-12 text-base bg-white/70 border-slate-300 text-slate-800 placeholder-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
           />
         </div>
       </CardHeader>
@@ -408,27 +406,29 @@ const CategorySelector = ({
             )}
           </div>
         ) : (
-          <ScrollArea className="h-[450px] pr-4">
-            <div className="space-y-2">
+          <ScrollArea className="h-[400px] sm:h-[450px] pr-2 sm:pr-4">
+            <div className="space-y-3">
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center space-x-3 p-4 rounded-xl hover:bg-blue-50/70 border border-slate-200/60 hover:border-blue-300/50 transition-all duration-200 bg-white/60 backdrop-blur-sm shadow-sm"
+                  className="flex items-start space-x-3 p-4 sm:p-5 rounded-xl hover:bg-blue-50/70 border border-slate-200/60 hover:border-blue-300/50 transition-all duration-200 bg-white/60 backdrop-blur-sm shadow-sm touch-manipulation"
                 >
                   <Checkbox
                     id={`category-${category.id}`}
                     checked={category.selected || false}
                     onCheckedChange={() => handleCategoryToggle(category.id)}
-                    className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                    className="mt-1 h-5 w-5 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                   />
                   <Label
                     htmlFor={`category-${category.id}`}
-                    className="flex-1 cursor-pointer flex justify-between text-slate-700 hover:text-slate-900"
+                    className="flex-1 cursor-pointer text-slate-700 hover:text-slate-900 min-h-[44px] flex items-start"
                   >
-                    <span className="font-medium">{category.name}</span>
-                    <span className="text-slate-500 text-sm bg-slate-100 px-2 py-1 rounded-full">
-                      {category.count} posts
-                    </span>
+                    <div className="flex-1 space-y-2">
+                      <div className="font-medium text-base leading-tight">{category.name}</div>
+                      <span className="inline-block text-slate-500 text-sm bg-slate-100 px-3 py-1 rounded-full">
+                        {category.count} posts
+                      </span>
+                    </div>
                   </Label>
                 </div>
               ))}

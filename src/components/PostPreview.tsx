@@ -471,10 +471,10 @@ const PostPreview = ({
 
   return (
     <div className="w-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg rounded-2xl p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+      <div className="space-y-4 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
           <svg
-            className="w-6 h-6 text-blue-600"
+            className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -484,22 +484,20 @@ const PostPreview = ({
               clipRule="evenodd"
             />
           </svg>
-          Case Report Preview
+          <span className="leading-tight">Case Report Preview</span>
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={handleSelectAll}
-            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-all duration-200"
+            className="h-12 bg-white/70 border-slate-300 text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-all duration-200 touch-manipulation"
           >
             Select All Reports
           </Button>
           <Button
             variant="outline"
-            size="sm"
             onClick={handleDeselectAll}
-            className="bg-white/70 border-slate-300 text-slate-700 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200"
+            className="h-12 bg-white/70 border-slate-300 text-slate-700 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200 touch-manipulation"
           >
             Deselect All
           </Button>
@@ -507,13 +505,13 @@ const PostPreview = ({
       </div>
 
       {selectedCategories.length > 0 && (
-        <div className="mb-6 p-4 bg-blue-50/70 border border-blue-200/50 rounded-xl backdrop-blur-sm">
-          <p className="text-sm font-medium mb-2 text-slate-700">
+        <div className="mb-6 p-4 sm:p-6 bg-blue-50/70 border border-blue-200/50 rounded-xl backdrop-blur-sm">
+          <p className="text-sm font-medium mb-3 text-slate-700">
             Selected Case #'s:
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {selectedCategories.map((category) => (
-              <Badge key={category.id} className="bg-blue-100 text-blue-800 border-blue-200">
+              <Badge key={category.id} className="bg-blue-100 text-blue-800 border-blue-200 text-xs sm:text-sm py-1 px-2 sm:px-3">
                 {category.name} ({category.count})
               </Badge>
             ))}
@@ -536,31 +534,31 @@ const PostPreview = ({
         </p>
         
         {displayPosts.length > 0 && (
-          <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-4 sm:p-6">
+            <h3 className="text-sm sm:text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Available Case Reports ({displayPosts.length} total):
+              <span className="leading-tight">Available Case Reports ({displayPosts.length} total):</span>
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {displayPosts.map((post, index) => {
                 const reportTitle = extractReportTitle(post.content);
                 return (
                   <div
                     key={post.id}
-                    className={`text-sm p-3 rounded-md border transition-all duration-200 cursor-pointer ${
+                    className={`text-sm sm:text-base p-4 rounded-lg border transition-all duration-200 cursor-pointer touch-manipulation min-h-[60px] flex flex-col justify-center ${
                       selectedPosts.includes(post.id)
                         ? "bg-blue-100 border-blue-300 text-blue-800"
-                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100"
                     }`}
                     onClick={() => handlePostSelection(post.id)}
                   >
-                    <div className="font-medium mb-1">
+                    <div className="font-medium mb-2 leading-tight">
                       <span className="text-xs text-slate-500">#{index + 1}:</span> {post.title}
                     </div>
                     {reportTitle && (
-                      <div className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                      <div className="text-xs sm:text-sm text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
                         <span className="font-semibold">Report:</span> {reportTitle}
                       </div>
                     )}
@@ -572,47 +570,50 @@ const PostPreview = ({
         )}
       </div>
 
-      <ScrollArea className="h-[500px] pr-4">
-        <div className="space-y-4">
+      <ScrollArea className="h-[400px] sm:h-[500px] pr-2 sm:pr-4">
+        <div className="space-y-4 sm:space-y-6">
           {displayPosts.map((post) => (
             <Card
               key={post.id}
               className="overflow-hidden bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-white/90 hover:shadow-lg transition-all duration-200 rounded-xl"
             >
-              <div className="flex items-start p-6">
-                <Checkbox
-                  id={`post-${post.id}`}
-                  checked={selectedPosts.includes(post.id)}
-                  onCheckedChange={() => handlePostSelection(post.id)}
-                  className="mr-4 mt-1 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                />
-                <div className="flex-1">
+              <div className="flex flex-col sm:flex-row items-start p-4 sm:p-6 gap-4 sm:gap-0">
+                <div className="flex items-center w-full sm:w-auto mb-2 sm:mb-0">
+                  <Checkbox
+                    id={`post-${post.id}`}
+                    checked={selectedPosts.includes(post.id)}
+                    onCheckedChange={() => handlePostSelection(post.id)}
+                    className="mr-3 sm:mr-4 h-5 w-5 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                  />
+                  <span className="text-sm text-slate-500 font-medium sm:hidden">Select this report</span>
+                </div>
+                <div className="flex-1 w-full">
                   <CardHeader className="p-0 pb-4">
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100 mb-3">
-                      <CardTitle className="text-2xl text-slate-900 font-bold leading-tight mb-2">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-lg border border-blue-100 mb-3">
+                      <CardTitle className="text-lg sm:text-xl lg:text-2xl text-slate-900 font-bold leading-tight mb-2">
                         {post.title}
                       </CardTitle>
                       {(() => {
                         const reportTitle = extractReportTitle(post.content);
                         return reportTitle ? (
-                          <div className="bg-amber-100 border border-amber-200 rounded-md p-2 mt-2">
+                          <div className="bg-amber-100 border border-amber-200 rounded-md p-2 sm:p-3 mt-2">
                             <span className="text-xs font-semibold text-amber-800 uppercase tracking-wide">Report Title:</span>
-                            <p className="text-sm font-medium text-amber-900 mt-1">{reportTitle}</p>
+                            <p className="text-sm font-medium text-amber-900 mt-1 leading-tight">{reportTitle}</p>
                           </div>
                         ) : null;
                       })()}
                     </div>
                     <div className="flex items-center text-sm text-slate-500">
-                      <Calendar className="h-4 w-4 mr-1" />
+                      <Calendar className="h-4 w-4 mr-2 shrink-0" />
                       <span className="font-medium">{formatDate(post.date)}</span>
                     </div>
                   </CardHeader>
 
                   <CardContent className="p-0 pb-4">
-                    <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex flex-col gap-4">
                       {post.featuredImage && (
-                        <div className="md:w-1/3">
-                          <div className="relative aspect-video rounded-lg overflow-hidden shadow-sm">
+                        <div className="w-full">
+                          <div className="relative aspect-video rounded-lg overflow-hidden shadow-sm max-w-md mx-auto sm:mx-0">
                             <img
                               src={post.featuredImage}
                               alt={post.title}
@@ -621,38 +622,38 @@ const PostPreview = ({
                           </div>
                         </div>
                       )}
-                      <div
-                        className={post.featuredImage ? "md:w-2/3" : "w-full"}
-                      >
-                        <p className="text-slate-700 leading-relaxed">{post.excerpt}</p>
+                      <div className="w-full">
+                        <p className="text-slate-700 leading-relaxed text-sm sm:text-base">{post.excerpt}</p>
 
                         {post.attachments.length > 0 && (
                           <div className="mt-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Paperclip className="h-4 w-4 text-slate-600" />
+                            <div className="flex items-center gap-2 mb-3">
+                              <Paperclip className="h-4 w-4 text-slate-600 shrink-0" />
                               <span className="text-sm font-medium text-slate-700">
-                                Attachments:
+                                Attachments ({post.attachments.length}):
                               </span>
                             </div>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                               {post.attachments.map((attachment) => (
                                 <Badge
                                   key={attachment.id}
-                                  className="flex items-center gap-1 bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                                  className="flex items-center gap-2 bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 p-2 justify-start min-h-[40px]"
                                 >
-                                  {attachment.type === "pdf" && (
-                                    <FileText className="h-3 w-3" />
-                                  )}
-                                  {attachment.type === "doc" && (
-                                    <FileText className="h-3 w-3" />
-                                  )}
-                                  {attachment.type === "txt" && (
-                                    <FileText className="h-3 w-3" />
-                                  )}
-                                  {attachment.type === "image" && (
-                                    <Image className="h-3 w-3" />
-                                  )}
-                                  {attachment.title}
+                                  <div className="shrink-0">
+                                    {attachment.type === "pdf" && (
+                                      <FileText className="h-4 w-4" />
+                                    )}
+                                    {attachment.type === "doc" && (
+                                      <FileText className="h-4 w-4" />
+                                    )}
+                                    {attachment.type === "txt" && (
+                                      <FileText className="h-4 w-4" />
+                                    )}
+                                    {attachment.type === "image" && (
+                                      <Image className="h-4 w-4" />
+                                    )}
+                                  </div>
+                                  <span className="truncate text-xs sm:text-sm">{attachment.title}</span>
                                 </Badge>
                               ))}
                             </div>

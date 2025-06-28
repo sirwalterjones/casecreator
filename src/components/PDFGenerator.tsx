@@ -1130,8 +1130,8 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
 
       {isGenerating && (
         <div className="space-y-3 mb-4">
-          <Progress value={progress} className="w-full" />
-          <div className="text-sm text-slate-600">
+          <Progress value={progress} className="w-full h-2 sm:h-3" />
+          <div className="text-sm sm:text-base text-slate-600 px-2">
             {currentStep}
           </div>
         </div>
@@ -1140,17 +1140,19 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
       <Button
         onClick={generateProfessionalPDF}
         disabled={selectedPosts.length === 0 || isGenerating}
-        className="w-full flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+        className="w-full h-12 sm:h-14 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-base sm:text-lg font-medium touch-manipulation transition-all duration-200 active:scale-95"
       >
         {isGenerating ? (
           <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            Generating Professional Case File...
+            <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-white"></div>
+            <span className="hidden sm:inline">Generating Professional Case File...</span>
+            <span className="sm:hidden">Generating PDF...</span>
           </>
         ) : (
           <>
-            <Download className="h-4 w-4" />
-            Generate Professional Case File PDF
+            <Download className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="hidden sm:inline">Generate Professional Case File PDF</span>
+            <span className="sm:hidden">Generate PDF</span>
           </>
         )}
       </Button>

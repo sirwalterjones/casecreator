@@ -3,7 +3,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write src/components/PDFGenerator.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
