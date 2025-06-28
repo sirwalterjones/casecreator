@@ -426,7 +426,7 @@ const CategorySelector = ({
                     <div className="flex-1 space-y-2">
                       <div className="font-medium text-base leading-tight">{category.name}</div>
                       <span className="inline-block text-slate-500 text-sm bg-slate-100 px-3 py-1 rounded-full">
-                        {category.count} posts
+                        {category.count} reports
                       </span>
                     </div>
                   </Label>
