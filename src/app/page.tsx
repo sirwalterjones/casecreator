@@ -56,27 +56,27 @@ const PasswordProtection = ({ onAuthenticated }: { onAuthenticated: () => void }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center px-4">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fill-rule=%22evenodd%22%3E%3Cg%20fill=%22%23f1f5f9%22%20fill-opacity=%220.4%22%3E%3Ccircle%20cx=%227%22%20cy=%227%22%20r=%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
       
-      <div className="relative z-10 w-full max-w-md">
-        <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border-b border-slate-200/50 p-8 text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl mb-6 shadow-xl mx-auto">
-              <Shield className="w-10 h-10 text-white" />
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md">
+        <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border-b border-slate-200/50 p-6 sm:p-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-xl mx-auto">
+              <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
             
-            <CardTitle className="text-2xl font-bold text-slate-800 mb-2">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
               Secure Access Required
             </CardTitle>
-            <CardDescription className="text-slate-600 text-base">
+            <CardDescription className="text-slate-600 text-sm sm:text-base">
               Cherokee Multi-Agency Narcotics Squad<br />
               Case File Generator
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="p-8">
+          <CardContent className="p-6 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium text-slate-700 flex items-center gap-2">
@@ -148,24 +148,24 @@ export default function Home() {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fill-rule=%22evenodd%22%3E%3Cg%20fill=%22%23f1f5f9%22%20fill-opacity=%220.4%22%3E%3Ccircle%20cx=%227%22%20cy=%227%22%20r=%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
       
-      <div className="relative z-10 container mx-auto max-w-6xl px-4 py-8">
+      <div className="relative z-10 container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Modern Header */}
-        <header className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl mb-6 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
-            <FileText className="w-12 h-12 text-white" />
+        <header className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
+            <FileText className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-white" />
           </div>
           
-          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-slate-800 via-blue-700 to-indigo-800 bg-clip-text text-transparent mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-slate-800 via-blue-700 to-indigo-800 bg-clip-text text-transparent mb-3 sm:mb-4 px-4">
             Case File Generator
           </h1>
           
-          <p className="text-xl text-slate-600 mb-2 font-medium">
+          <p className="text-lg sm:text-xl text-slate-600 mb-2 font-medium px-4">
             Cherokee Multi-Agency Narcotics Squad
           </p>
           
           {/* Progress Bar */}
-          <div className="mt-8 max-w-md mx-auto">
-            <div className="flex justify-between text-sm font-medium text-slate-600 mb-2">
+          <div className="mt-6 sm:mt-8 max-w-xs sm:max-w-md mx-auto px-4">
+            <div className="flex justify-between text-xs sm:text-sm font-medium text-slate-600 mb-2">
               <span>Progress</span>
               <span>{Math.round(getStepProgress())}%</span>
             </div>
@@ -180,83 +180,83 @@ export default function Home() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Modern Tab Navigation */}
-          <div className="mb-8 p-2 bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
-            <TabsList className="grid w-full grid-cols-4 bg-transparent p-0 h-auto gap-2">
+          <div className="mb-6 sm:mb-8 p-1 sm:p-2 bg-white/70 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/20">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-transparent p-0 h-auto gap-1 sm:gap-2">
               <TabsTrigger
                 value="categories"
-                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0"
+                className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-6 rounded-lg sm:rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0"
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 data-[state=active]:bg-white/20">
-                  <Users className="w-6 h-6 text-blue-600 data-[state=active]:text-white" />
+                <div className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-blue-100 data-[state=active]:bg-white/20">
+                  <Users className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 data-[state=active]:text-white" />
                 </div>
                 <div className="text-center">
-                  <div className="font-semibold text-sm">Select Source</div>
-                  <div className="text-xs opacity-70">Choose case data</div>
+                  <div className="font-semibold text-xs sm:text-sm">Select Source</div>
+                  <div className="text-xs opacity-70 hidden sm:block">Choose case data</div>
                 </div>
               </TabsTrigger>
               
               <TabsTrigger
                 value="posts"
                 disabled={selectedCategories.length === 0}
-                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
+                className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-6 rounded-lg sm:rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 data-[state=active]:bg-white/20">
-                  <FileText className="w-6 h-6 text-emerald-600 data-[state=active]:text-white" />
+                <div className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-emerald-100 data-[state=active]:bg-white/20">
+                  <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 data-[state=active]:text-white" />
                 </div>
                 <div className="text-center">
-                  <div className="font-semibold text-sm">Review Content</div>
-                  <div className="text-xs opacity-70">Preview reports</div>
+                  <div className="font-semibold text-xs sm:text-sm">Review Content</div>
+                  <div className="text-xs opacity-70 hidden sm:block">Preview reports</div>
                 </div>
               </TabsTrigger>
               
               <TabsTrigger
                 value="customize"
                 disabled={selectedPosts.length === 0}
-                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
+                className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-6 rounded-lg sm:rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 data-[state=active]:bg-white/20">
-                  <Settings className="w-6 h-6 text-purple-600 data-[state=active]:text-white" />
+                <div className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-purple-100 data-[state=active]:bg-white/20">
+                  <Settings className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 data-[state=active]:text-white" />
                 </div>
                 <div className="text-center">
-                  <div className="font-semibold text-sm">Customize</div>
-                  <div className="text-xs opacity-70">Format options</div>
+                  <div className="font-semibold text-xs sm:text-sm">Customize</div>
+                  <div className="text-xs opacity-70 hidden sm:block">Format options</div>
                 </div>
               </TabsTrigger>
               
               <TabsTrigger
                 value="generate"
                 disabled={selectedPosts.length === 0}
-                className="flex flex-col items-center gap-3 p-6 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
+                className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-6 rounded-lg sm:rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 hover:text-slate-800 transition-all duration-200 border-0 disabled:opacity-40"
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 data-[state=active]:bg-white/20">
-                  <Download className="w-6 h-6 text-orange-600 data-[state=active]:text-white" />
+                <div className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-orange-100 data-[state=active]:bg-white/20">
+                  <Download className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600 data-[state=active]:text-white" />
                 </div>
                 <div className="text-center">
-                  <div className="font-semibold text-sm">Generate</div>
-                  <div className="text-xs opacity-70">Create PDF</div>
+                  <div className="font-semibold text-xs sm:text-sm">Generate</div>
+                  <div className="text-xs opacity-70 hidden sm:block">Create PDF</div>
                 </div>
               </TabsTrigger>
             </TabsList>
           </div>
 
           {/* Content Card */}
-          <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border-b border-slate-200/50 p-8">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
-                  {activeTab === "categories" && <Users className="w-6 h-6 text-white" />}
-                  {activeTab === "posts" && <FileText className="w-6 h-6 text-white" />}
-                  {activeTab === "customize" && <Settings className="w-6 h-6 text-white" />}
-                  {activeTab === "generate" && <Download className="w-6 h-6 text-white" />}
+          <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border-b border-slate-200/50 p-4 sm:p-6 lg:p-8">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+                  {activeTab === "categories" && <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+                  {activeTab === "posts" && <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+                  {activeTab === "customize" && <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+                  {activeTab === "generate" && <Download className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold text-slate-800 mb-1">
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 mb-1">
                     {activeTab === "categories" && "Source Selection"}
                     {activeTab === "posts" && "Content Review"}
                     {activeTab === "customize" && "Document Customization"}
                     {activeTab === "generate" && "File Generation"}
                   </CardTitle>
-                  <CardDescription className="text-slate-600 text-base">
+                  <CardDescription className="text-slate-600 text-sm sm:text-base hidden sm:block">
                     {activeTab === "categories" && "Choose your case data source and select the case number"}
                     {activeTab === "posts" && "Review available reports and select which ones to include"}
                     {activeTab === "customize" && "Configure your document formatting and layout preferences"}
@@ -266,7 +266,7 @@ export default function Home() {
               </div>
             </CardHeader>
             
-            <CardContent className="p-8">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
               <TabsContent value="categories" className="mt-0">
                 <CategorySelector
                   onCategoriesSelected={(categories, url) => {
@@ -308,17 +308,19 @@ export default function Home() {
           </Card>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center mt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 gap-4 sm:gap-0">
             <Button
               variant="outline"
               onClick={handlePreviousStep}
               disabled={activeTab === "categories"}
-              className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-sm border-slate-300 text-slate-700 hover:bg-white hover:text-slate-900 rounded-xl shadow-lg transition-all duration-200 disabled:opacity-40"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white/70 backdrop-blur-sm border-slate-300 text-slate-700 hover:bg-white hover:text-slate-900 rounded-lg sm:rounded-xl shadow-lg transition-all duration-200 disabled:opacity-40 w-full sm:w-auto"
             >
-              <ChevronLeft className="h-4 w-4" /> Previous
+              <ChevronLeft className="h-4 w-4" /> 
+              <span className="hidden sm:inline">Previous</span>
+              <span className="sm:hidden">Back</span>
             </Button>
 
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 order-first sm:order-none">
               <span>Step {["categories", "posts", "customize", "generate"].indexOf(activeTab) + 1} of 4</span>
             </div>
 
@@ -329,16 +331,19 @@ export default function Home() {
                 (activeTab === "posts" && selectedPosts.length === 0) ||
                 activeTab === "generate"
               }
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 w-full sm:w-auto"
             >
               {activeTab !== "generate" ? (
                 <>
-                  Continue <ChevronRight className="h-4 w-4" />
+                  <span className="hidden sm:inline">Continue</span>
+                  <span className="sm:hidden">Next</span>
+                  <ChevronRight className="h-4 w-4" />
                 </>
               ) : (
                 <>
                   <Download className="w-4 h-4" />
-                  Download File
+                  <span className="hidden sm:inline">Download File</span>
+                  <span className="sm:hidden">Download</span>
                 </>
               )}
             </Button>
