@@ -1,5 +1,5 @@
 import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { logAccess } from '@/lib/accessLog'
 
 // 🔒 PRODUCTION IP ALLOWLIST - CMANS Case File Generator
 const ALLOWED_IPS = [
@@ -27,14 +27,32 @@ function getClientIP(): string {
 }
 
 export default function IPGuard({ children }: { children: React.ReactNode }) {
+  const headersList = headers()
   const clientIP = getClientIP()
   const cleanIP = clientIP.replace(/^::ffff:/, '').split(':')[0]
+  
+  // Get request info for logging
+  const url = headersList.get('x-pathname') || '/'
+  const userAgent = headersList.get('user-agent') || 'Unknown'
+  const allHeaders = Object.fromEntries(headersList.entries())
   
   console.log(`🔍 [IP GUARD] Checking IP: ${cleanIP} (from ${clientIP})`)
   console.log(`🔍 [IP GUARD] Allowed IPs: ${ALLOWED_IPS.join(', ')}`)
   
   // Check if the IP is in the allowed list
-  if (!ALLOWED_IPS.includes(cleanIP)) {
+  const isAllowed = ALLOWED_IPS.includes(cleanIP)
+  
+  // Log the access attempt
+  logAccess({
+    timestamp: new Date().toISOString(),
+    ip: cleanIP,
+    userAgent,
+    url,
+    allowed: isAllowed,
+    headers: allHeaders
+  })
+  
+  if (!isAllowed) {
     console.log(`❌ [IP GUARD] ACCESS DENIED for IP: ${cleanIP}`)
     
     return (

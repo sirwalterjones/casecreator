@@ -176,6 +176,18 @@ export default function Home() {
       <div className="relative z-10 container mx-auto max-w-6xl px-2 sm:px-4 py-4 sm:py-8">
         {/* Modern Header */}
         <header className="text-center mb-6 sm:mb-12">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={() => window.open('/access-logs', '_blank')}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 bg-white/70 backdrop-blur-sm border-slate-300 text-slate-700 hover:bg-white hover:text-slate-900 rounded-lg shadow-lg transition-all duration-200"
+            >
+              <Shield className="h-4 w-4" />
+              Access Logs
+            </Button>
+          </div>
+          
           <div className="inline-flex items-center justify-center w-16 h-16 sm:w-24 sm:h-24 bg-white rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-300 p-2 sm:p-3">
             <Image
               src="/images/cropped-newestcmanslogo.png"
