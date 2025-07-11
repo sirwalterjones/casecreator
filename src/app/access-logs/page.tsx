@@ -32,16 +32,42 @@ export default function AccessLogsPage() {
   const fetchLogs = async () => {
     setLoading(true)
     try {
-      const [logsResponse, statsResponse] = await Promise.all([
-        fetch('/api/access-logs'),
+      // Try live endpoint first, fall back to regular
+      const [liveResponse, statsResponse] = await Promise.all([
+        fetch('/api/access-logs/live'),
         fetch('/api/access-logs/stats')
       ])
       
-      if (logsResponse.ok && statsResponse.ok) {
-        const logsData = await logsResponse.json()
-        const statsData = await statsResponse.json()
-        setLogs(logsData)
-        setStats(statsData)
+      if (liveResponse.ok) {
+        const liveData = await liveResponse.json()
+        setLogs(liveData)
+        
+        // Calculate stats from live data
+        const totalAttempts = liveData.length
+        const allowedAttempts = liveData.filter((log: AccessLogEntry) => log.allowed).length
+        const blockedAttempts = liveData.filter((log: AccessLogEntry) => !log.allowed).length
+        const uniqueIPs = new Set(liveData.map((log: AccessLogEntry) => log.ip)).size
+        const recentBlocked = liveData.filter((log: AccessLogEntry) => !log.allowed).slice(0, 20)
+        
+        setStats({
+          totalAttempts,
+          allowedAttempts,
+          blockedAttempts,
+          uniqueIPs,
+          recentBlocked
+        })
+      } else if (statsResponse.ok) {
+        // Fallback to original endpoint
+        const [logsResponse] = await Promise.all([
+          fetch('/api/access-logs')
+        ])
+        
+        if (logsResponse.ok) {
+          const logsData = await logsResponse.json()
+          const statsData = await statsResponse.json()
+          setLogs(logsData)
+          setStats(statsData)
+        }
       }
     } catch (error) {
       console.error('Failed to fetch logs:', error)
@@ -242,6 +268,11 @@ export default function AccessLogsPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4" />
                             {getUserAgentInfo(log.userAgent)}
+                            {(log as any).realTime && (
+                              <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-400">
+                                LIVE
+                              </Badge>
+                            )}
                           </div>
                         </td>
                       </tr>
