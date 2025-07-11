@@ -24,20 +24,19 @@ function getClientIP(request: NextRequest): string {
 }
 
 export function middleware(request: NextRequest) {
-  // Get the client's IP address with production-ready detection
+  // IMMEDIATE IP CHECK - Block unauthorized IPs first
   const clientIP = getClientIP(request)
-  
-  // Clean the IP address (remove port if present and handle IPv6)
   const cleanIP = clientIP.replace(/^::ffff:/, '').split(':')[0]
   
-  console.log(`🔍 [MIDDLEWARE ACTIVE] IP Check: ${cleanIP} (from ${clientIP})`)
-  console.log(`🔍 [MIDDLEWARE ACTIVE] URL: ${request.url}`)
-  console.log(`🔍 [MIDDLEWARE ACTIVE] Timestamp: ${new Date().toISOString()}`)
-  console.log(`🔍 [MIDDLEWARE ACTIVE] User-Agent: ${request.headers.get('user-agent')}`)
+  console.log(`🔍 [MIDDLEWARE EXECUTING] IP Check: ${cleanIP} (from ${clientIP})`)
+  console.log(`🔍 [MIDDLEWARE EXECUTING] URL: ${request.url}`)
+  console.log(`🔍 [MIDDLEWARE EXECUTING] Allowed IPs: ${ALLOWED_IPS.join(', ')}`)
+  console.log(`🔍 [MIDDLEWARE EXECUTING] Headers: ${JSON.stringify(Object.fromEntries(request.headers.entries()))}`)
   
-  // Check if the IP is in the allowed list
+  // STRICT IP CHECK - Block if not in whitelist
   if (!ALLOWED_IPS.includes(cleanIP)) {
-    console.log(`❌ [PRODUCTION] ACCESS DENIED for IP: ${cleanIP}`)
+    console.log(`❌ [BLOCKED] ACCESS DENIED for IP: ${cleanIP}`)
+    console.log(`❌ [BLOCKED] This should show a 403 error page immediately`)
     
     // Return professional 403 error page
     return new NextResponse(
@@ -120,15 +119,16 @@ export function middleware(request: NextRequest) {
   }
   
   // Log successful access
-  console.log(`✅ [PRODUCTION] ACCESS GRANTED for IP: ${cleanIP}`)
+  console.log(`✅ [ALLOWED] ACCESS GRANTED for IP: ${cleanIP}`)
+  console.log(`✅ [ALLOWED] Proceeding to application`)
   
   // Allow the request to proceed
   return NextResponse.next()
 }
 
-// Configure which routes this middleware applies to
+// Configure which routes this middleware applies to - BLOCK ALL ROUTES
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/(.*)',  // Match ALL routes including root
   ],
 } 
