@@ -114,37 +114,6 @@ export default function AccessLogsPage() {
               Last updated: {lastRefresh.toLocaleTimeString()}
             </div>
             <Button 
-              onClick={async () => {
-                try {
-                  await fetch('/api/access-logs/populate', { method: 'POST' })
-                  fetchLogs() // Refresh after populating
-                } catch (error) {
-                  console.error('Failed to populate:', error)
-                }
-              }}
-              variant="outline"
-              size="sm"
-              className="border-green-400 text-green-400 hover:bg-green-400 hover:text-black"
-            >
-              Populate Test Data
-            </Button>
-            <Button 
-              onClick={async () => {
-                try {
-                  const response = await fetch('/api/access-logs/debug')
-                  const data = await response.json()
-                  alert(`Global logs: ${data.globalLogsCount}\nFunction: ${data.functionId}\nTime: ${data.timestamp}`)
-                } catch (error) {
-                  console.error('Failed to debug:', error)
-                }
-              }}
-              variant="outline"
-              size="sm"
-              className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-black"
-            >
-              Debug Global Store
-            </Button>
-            <Button 
               onClick={fetchLogs} 
               disabled={loading}
               variant="outline"
