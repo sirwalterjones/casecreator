@@ -7,22 +7,34 @@ export interface AccessLogEntry {
   headers: Record<string, string>
 }
 
-// In-memory storage for serverless environment
-const accessLogs: AccessLogEntry[] = []
+// Global storage that persists across function calls
+declare global {
+  var accessLogs: AccessLogEntry[] | undefined
+}
+
+// Initialize global storage
+if (!global.accessLogs) {
+  global.accessLogs = []
+}
+
 const MAX_LOGS = 500 // Keep last 500 entries
 
 export function logAccess(entry: AccessLogEntry): void {
   try {
-    // Add to in-memory storage
-    accessLogs.unshift(entry) // Add to beginning for newest first
+    if (!global.accessLogs) {
+      global.accessLogs = []
+    }
+    
+    // Add to global storage
+    global.accessLogs.unshift(entry) // Add to beginning for newest first
     
     // Keep only the most recent entries
-    if (accessLogs.length > MAX_LOGS) {
-      accessLogs.splice(MAX_LOGS)
+    if (global.accessLogs.length > MAX_LOGS) {
+      global.accessLogs.splice(MAX_LOGS)
     }
     
     console.log(`📝 [ACCESS LOG] ${entry.allowed ? 'ALLOWED' : 'BLOCKED'} - ${entry.ip} - ${entry.url}`)
-    console.log(`📝 [ACCESS LOG] Total logged entries: ${accessLogs.length}`)
+    console.log(`📝 [ACCESS LOG] Total logged entries: ${global.accessLogs.length}`)
   } catch (error) {
     console.error('Failed to write access log:', error)
   }
@@ -30,8 +42,12 @@ export function logAccess(entry: AccessLogEntry): void {
 
 export function getAccessLogs(limit: number = 100): AccessLogEntry[] {
   try {
+    if (!global.accessLogs) {
+      global.accessLogs = []
+    }
+    
     // Return the most recent entries (already sorted newest first)
-    return accessLogs.slice(0, Math.min(limit, accessLogs.length))
+    return global.accessLogs.slice(0, Math.min(limit, global.accessLogs.length))
   } catch (error) {
     console.error('Failed to read access logs:', error)
     return []
@@ -45,7 +61,11 @@ export function getLogStats(): {
   uniqueIPs: number
   recentBlocked: AccessLogEntry[]
 } {
-  const logs = accessLogs // Use all in-memory logs
+  if (!global.accessLogs) {
+    global.accessLogs = []
+  }
+  
+  const logs = global.accessLogs // Use all global logs
   
   const totalAttempts = logs.length
   const allowedAttempts = logs.filter(log => log.allowed).length
@@ -60,4 +80,17 @@ export function getLogStats(): {
     uniqueIPs,
     recentBlocked
   }
+}
+
+// Helper function to add logs manually (for testing or manual entry)
+export function addManualLog(ip: string, allowed: boolean, url: string = '/', userAgent: string = 'Manual Entry'): void {
+  const entry: AccessLogEntry = {
+    timestamp: new Date().toISOString(),
+    ip,
+    userAgent,
+    url,
+    allowed,
+    headers: {}
+  }
+  logAccess(entry)
 }
