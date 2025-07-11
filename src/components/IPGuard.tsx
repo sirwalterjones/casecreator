@@ -43,14 +43,18 @@ export default function IPGuard({ children }: { children: React.ReactNode }) {
   const isAllowed = ALLOWED_IPS.includes(cleanIP)
   
   // Log the access attempt
-  logAccess({
+  const logEntry = {
     timestamp: new Date().toISOString(),
     ip: cleanIP,
     userAgent,
     url,
     allowed: isAllowed,
     headers: allHeaders
-  })
+  }
+  
+  console.log(`🔍 [IP GUARD] About to log entry:`, JSON.stringify(logEntry, null, 2))
+  logAccess(logEntry)
+  console.log(`🔍 [IP GUARD] Log entry saved successfully`)
   
   if (!isAllowed) {
     console.log(`❌ [IP GUARD] ACCESS DENIED for IP: ${cleanIP}`)

@@ -103,6 +103,22 @@ export default function AccessLogsPage() {
               Populate Test Data
             </Button>
             <Button 
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/access-logs/debug')
+                  const data = await response.json()
+                  alert(`Global logs: ${data.globalLogsCount}\nFunction: ${data.functionId}\nTime: ${data.timestamp}`)
+                } catch (error) {
+                  console.error('Failed to debug:', error)
+                }
+              }}
+              variant="outline"
+              size="sm"
+              className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-black"
+            >
+              Debug Global Store
+            </Button>
+            <Button 
               onClick={fetchLogs} 
               disabled={loading}
               variant="outline"
