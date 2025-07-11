@@ -1,6 +1,3 @@
-import { writeFileSync, readFileSync, existsSync } from 'fs'
-import { join } from 'path'
-
 export interface AccessLogEntry {
   timestamp: string
   ip: string
@@ -10,21 +7,22 @@ export interface AccessLogEntry {
   headers: Record<string, string>
 }
 
-const LOG_FILE = join(process.cwd(), 'access.log')
+// In-memory storage for serverless environment
+const accessLogs: AccessLogEntry[] = []
+const MAX_LOGS = 500 // Keep last 500 entries
 
 export function logAccess(entry: AccessLogEntry): void {
   try {
-    const logLine = JSON.stringify(entry) + '\n'
+    // Add to in-memory storage
+    accessLogs.unshift(entry) // Add to beginning for newest first
     
-    // Append to log file
-    if (existsSync(LOG_FILE)) {
-      const existingLogs = readFileSync(LOG_FILE, 'utf-8')
-      writeFileSync(LOG_FILE, existingLogs + logLine, 'utf-8')
-    } else {
-      writeFileSync(LOG_FILE, logLine, 'utf-8')
+    // Keep only the most recent entries
+    if (accessLogs.length > MAX_LOGS) {
+      accessLogs.splice(MAX_LOGS)
     }
     
     console.log(`📝 [ACCESS LOG] ${entry.allowed ? 'ALLOWED' : 'BLOCKED'} - ${entry.ip} - ${entry.url}`)
+    console.log(`📝 [ACCESS LOG] Total logged entries: ${accessLogs.length}`)
   } catch (error) {
     console.error('Failed to write access log:', error)
   }
@@ -32,23 +30,8 @@ export function logAccess(entry: AccessLogEntry): void {
 
 export function getAccessLogs(limit: number = 100): AccessLogEntry[] {
   try {
-    if (!existsSync(LOG_FILE)) {
-      return []
-    }
-    
-    const logs = readFileSync(LOG_FILE, 'utf-8')
-    const lines = logs.trim().split('\n').filter(line => line.length > 0)
-    
-    // Get the most recent entries
-    const recentLines = lines.slice(-limit).reverse()
-    
-    return recentLines.map(line => {
-      try {
-        return JSON.parse(line) as AccessLogEntry
-      } catch {
-        return null
-      }
-    }).filter(entry => entry !== null) as AccessLogEntry[]
+    // Return the most recent entries (already sorted newest first)
+    return accessLogs.slice(0, Math.min(limit, accessLogs.length))
   } catch (error) {
     console.error('Failed to read access logs:', error)
     return []
@@ -62,7 +45,7 @@ export function getLogStats(): {
   uniqueIPs: number
   recentBlocked: AccessLogEntry[]
 } {
-  const logs = getAccessLogs(1000) // Get more logs for stats
+  const logs = accessLogs // Use all in-memory logs
   
   const totalAttempts = logs.length
   const allowedAttempts = logs.filter(log => log.allowed).length
