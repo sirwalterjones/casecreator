@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 // 🔒 PRODUCTION IP ALLOWLIST - CMANS Case File Generator
 const ALLOWED_IPS = [
@@ -6,7 +7,7 @@ const ALLOWED_IPS = [
   '50.146.14.50'
 ]
 
-function getClientIP(request) {
+function getClientIP(request: NextRequest): string {
   // Production IP detection - handles CDNs, load balancers, proxies
   return (
     request.headers.get('cf-connecting-ip') ||           // Cloudflare
@@ -22,16 +23,17 @@ function getClientIP(request) {
   )
 }
 
-export function middleware(request) {
+export function middleware(request: NextRequest) {
   // Get the client's IP address with production-ready detection
   const clientIP = getClientIP(request)
   
   // Clean the IP address (remove port if present and handle IPv6)
   const cleanIP = clientIP.replace(/^::ffff:/, '').split(':')[0]
   
-  console.log(`🔍 [PRODUCTION v2] IP Check: ${cleanIP} (from ${clientIP})`)
-  console.log(`🔍 [PRODUCTION v2] URL: ${request.url}`)
-  console.log(`🔍 [PRODUCTION v2] Timestamp: ${new Date().toISOString()}`)
+  console.log(`🔍 [MIDDLEWARE ACTIVE] IP Check: ${cleanIP} (from ${clientIP})`)
+  console.log(`🔍 [MIDDLEWARE ACTIVE] URL: ${request.url}`)
+  console.log(`🔍 [MIDDLEWARE ACTIVE] Timestamp: ${new Date().toISOString()}`)
+  console.log(`🔍 [MIDDLEWARE ACTIVE] User-Agent: ${request.headers.get('user-agent')}`)
   
   // Check if the IP is in the allowed list
   if (!ALLOWED_IPS.includes(cleanIP)) {
