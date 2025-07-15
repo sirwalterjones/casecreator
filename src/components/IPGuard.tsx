@@ -4,7 +4,8 @@ import { logAccess } from '@/lib/accessLog'
 // 🔒 PRODUCTION IP ALLOWLIST - CMANS Case File Generator
 const ALLOWED_IPS = [
   '137.184.215.216',
-  '50.146.14.50'
+  '50.146.14.50',
+  '50.234.190.202'
 ]
 
 function getClientIP(): string {
