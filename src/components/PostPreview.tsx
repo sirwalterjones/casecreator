@@ -77,19 +77,38 @@ const PostPreview = ({
     setError(null);
 
     try {
-      // Try WordPress REST API first
+      // Try WordPress REST API first with pagination to retrieve ALL posts
       const categoryIds = selectedCategories.map((cat) => cat.id.toString());
-      const apiUrl = siteUrl.endsWith("/")
+      const baseApiUrl = siteUrl.endsWith("/")
         ? `${siteUrl}wp-json/wp/v2/posts`
         : `${siteUrl}/wp-json/wp/v2/posts`;
 
       try {
-        const response = await fetch(
-          `${apiUrl}?per_page=20&categories=${categoryIds.join(",")}&_embed`,
-        );
-        if (response.ok) {
-          const apiPosts = await response.json();
-          const formattedPosts: Post[] = apiPosts.map((post: any) => ({
+        let allPosts: any[] = [];
+        let page = 1;
+        let hasMore = true;
+        const perPage = 100; // fetch as many as WP allows per page (often up to 100)
+
+        while (hasMore) {
+          const url = `${baseApiUrl}?per_page=${perPage}&page=${page}&categories=${categoryIds.join(",")}&_embed`;
+          const response = await fetch(url);
+
+          if (response.ok) {
+            const apiPosts = await response.json();
+            allPosts = allPosts.concat(apiPosts);
+
+            const totalPages = parseInt(
+              response.headers.get("X-WP-TotalPages") || "1",
+            );
+            page += 1;
+            hasMore = page <= totalPages && apiPosts.length > 0;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        if (allPosts.length > 0) {
+          const formattedPosts: Post[] = allPosts.map((post: any) => ({
             id: post.id,
             title: post.title.rendered || post.title,
             excerpt: post.excerpt?.rendered?.replace(/<[^>]*>/g, "") || "",
@@ -369,7 +388,8 @@ const PostPreview = ({
       });
     });
 
-    return posts.slice(0, 10);
+    // Return all parsed posts (no artificial limit)
+    return posts;
   };
 
   // Fetch posts when categories or site URL changes
