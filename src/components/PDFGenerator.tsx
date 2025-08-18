@@ -621,6 +621,11 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
 
         // Account for all TOC pages in page count before rendering content
         currentPageCount += tocTotalPages;
+
+        // Ensure content starts AFTER the TOC: add a new page for the first post
+        // so TOC does not run onto the first report
+        pdf.addPage();
+        currentPageCount++;
       }
 
       setProgress(20);
