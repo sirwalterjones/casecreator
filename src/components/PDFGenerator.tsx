@@ -583,12 +583,44 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
       // Track current page number manually
       let currentPageCount = templateSettings.includeCoverPage ? 1 : 0;
 
-      // We'll temporarily store the TOC page number to come back to it
+      // We'll temporarily store the TOC start page and reserve enough TOC pages up front
       let tocPageNumber = -1;
+      let tocTotalPages = 0;
       if (templateSettings.includeCoverPage && selectedPosts.length > 0) {
-        currentPageCount++; // TOC will be page 2
-        tocPageNumber = currentPageCount;
-        pdf.addPage(); // Add placeholder page for TOC
+        // We already added one page after the cover; treat it as the first TOC page
+        tocPageNumber = 2;
+        tocTotalPages = 1;
+
+        // Estimate how many TOC pages are needed based on entry heights
+        // Match TOC rendering logic: title at y=35, then +20 spacing, entries start ~55
+        let tocYPosEstimate = 55;
+        const pageNumSampleWidth = pdf.getTextWidth('Page 999');
+
+        selectedPosts.forEach((post, index) => {
+          const reportTitle = extractReportTitle(post.content);
+          const displayTitle = reportTitle || post.title;
+
+          // Available width leaves space for page number and indentation (similar to renderer)
+          const availableWidth = contentWidth - pageNumSampleWidth - 40;
+          const titleLines = pdf.splitTextToSize(displayTitle, availableWidth);
+          const entryHeight = (titleLines.length * 5) + 6;
+
+          // Page break condition mirrors renderer check
+          if (tocYPosEstimate > pageHeight - 40) {
+            tocTotalPages += 1;
+            tocYPosEstimate = 40; // reset for new page after header
+          }
+
+          tocYPosEstimate += entryHeight;
+        });
+
+        // Reserve additional placeholder pages for TOC beyond the first one already added
+        for (let i = 1; i < tocTotalPages; i++) {
+          pdf.addPage();
+        }
+
+        // Account for all TOC pages in page count before rendering content
+        currentPageCount += tocTotalPages;
       }
 
       setProgress(20);
@@ -936,6 +968,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
 
       // Now generate the Table of Contents with actual page numbers
       if (templateSettings.includeCoverPage && selectedPosts.length > 0 && tocPageNumber > 0) {
+        // Render TOC across reserved pages directly after the cover page
         pdf.setPage(tocPageNumber);
         
         // Add header to table of contents page
@@ -966,6 +999,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
         pdf.setFont("times", "normal");
         pdf.setFontSize(11);
         
+        let currentTocPage = tocPageNumber;
         tocEntries.forEach((entry) => {
           // Check if we need a new page
           if (tocYPos > pageHeight - 40) {
@@ -977,7 +1011,9 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({
             pdf.setTextColor(255, 255, 255);
             pdf.text(templateSettings.footerText, margins, pageHeight - 4);
             
-            pdf.addPage();
+            // Move to the next reserved TOC page
+            currentTocPage += 1;
+            pdf.setPage(currentTocPage);
             
             // Add header to new page
             pdf.setFillColor(headerColor.r, headerColor.g, headerColor.b);
